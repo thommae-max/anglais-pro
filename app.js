@@ -581,7 +581,7 @@
     try {
       const reg = await navigator.serviceWorker.ready;
       const th = AP.dayTheme();
-      await reg.showNotification('Anglais pro', { body: 'Votre session de 5 minutes vous attend' + (th ? ' : ' + AP.TH[th].name : '') + '.', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: 'anglais-pro-daily' });
+      await reg.showNotification('Anglais pro', { body: 'Votre session de 5 minutes vous attend' + (th ? ' : ' + AP.TH[th].name : '') + '.', icon: 'icon-192.png', badge: 'icon-192.png', tag: 'anglais-pro-daily' });
     } catch (e) { toast('Test impossible'); }
   }
 

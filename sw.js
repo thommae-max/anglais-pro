@@ -1,6 +1,6 @@
 /* Anglais pro : service worker (hors ligne + notifications) */
-const CACHE = 'anglais-pro-v1';
-const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'core.js', 'quiz.js', 'config.js', 'data/content.js', 'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
+const CACHE = 'anglais-pro-v2';
+const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'core.js', 'quiz.js', 'config.js', 'content.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -23,7 +23,7 @@ self.addEventListener('push', (e) => {
   try { d = e.data ? e.data.json() : {}; } catch (x) { d = { body: e.data ? e.data.text() : '' }; }
   e.waitUntil(self.registration.showNotification(d.title || 'Anglais pro', {
     body: d.body || 'Votre session de 5 minutes vous attend.',
-    icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: 'anglais-pro-daily', data: { url: d.url || './' }
+    icon: 'icon-192.png', badge: 'icon-192.png', tag: 'anglais-pro-daily', data: { url: d.url || './' }
   }));
 });
 self.addEventListener('notificationclick', (e) => {
