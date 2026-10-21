@@ -1,5 +1,5 @@
 /* Anglais pro : service worker (hors ligne + notifications) */
-const CACHE = 'anglais-pro-v8';
+const CACHE = 'anglais-pro-v9';
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'core.js', 'quiz.js', 'config.js', 'content.js', 'toeic-data.js', 'partner.js', 'oral.js', 'progress.js', 'toeic-ui.js', 'main.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -23,13 +23,14 @@ self.addEventListener('push', (e) => {
   try { d = e.data ? e.data.json() : {}; } catch (x) { d = { body: e.data ? e.data.text() : '' }; }
   e.waitUntil(self.registration.showNotification(d.title || 'Anglais pro', {
     body: d.body || 'Votre session de 5 minutes vous attend.',
-    icon: 'icon-192.png', badge: 'icon-192.png', tag: 'anglais-pro-daily', data: { url: d.url || './' }
+    icon: 'icon-192.png', badge: 'icon-192.png', tag: d.tag || 'anglais-pro-daily', data: { url: d.url || './' }
   }));
 });
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((cs) => {
-    for (const c of cs) { if ('focus' in c) return c.focus(); }
-    return self.clients.openWindow((e.notification.data && e.notification.data.url) || './');
+    const url = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
+    for (const c of cs) { if ('focus' in c) return c.focus().then((w) => { if (w && 'navigate' in w && true) return w.navigate(url); }); }
+    return self.clients.openWindow(url);
   }));
 });

@@ -1,0 +1,22 @@
+name: Bilan du lundi
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+jobs:
+  envoi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+      - run: node send-reminder.js
+        env:
+          PUSH_SUB: ${{ secrets.PUSH_SUB }}
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          MODE: bilan
+          FORCE: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}

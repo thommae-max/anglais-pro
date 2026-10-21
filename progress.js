@@ -130,6 +130,7 @@
     const total = Object.keys(days).filter((d) => days[d] > 0).length;
     const t = AP.totals();
     let h = '<div class="top"><div class="h1" style="margin:0">Mon suivi</div><button class="gearbtn" data-act="go" data-to="settings" aria-label="Réglages">' + I.gear + '</button></div>';
+    h += '<button class="tile" style="margin:6px 0 4px" data-act="go" data-to="bilan"><div class="tt"><span>Bilan de la semaine écoulée</span><span>›</span></div><div class="td" style="margin:2px 0 0">Votre point du lundi : jours, cartes, quiz, TOEIC.</div></button>';
     h += '<div class="h2" style="margin-top:6px">Régularité</div><div class="card">' + weekDots() +
       '<div class="td" style="margin:10px 0 0">' + wc + ' jour' + (wc > 1 ? 's' : '') + ' travaillé' + (wc > 1 ? 's' : '') + ' cette semaine sur ' + g.days + ' visés' + (wc >= g.days ? ' : objectif atteint' : '') + '</div>' +
       '<div class="mstats"><div><b>' + AP.streak() + '</b><span>série en cours</span></div><div><b>' + bestStreak() + '</b><span>meilleure série</span></div><div><b>' + total + '</b><span>jours au total</span></div></div>' + calendar() + '</div>';
@@ -156,6 +157,37 @@
     G()[k] = (k === 'wordsDate' || k === 'toeicDate') ? v : Number(v);
     AP.save(); U.rerenderNoAnim(); view();
   });
+
+
+  /* ---------- Bilan hebdomadaire (semaine écoulée, lundi à dimanche) ---------- */
+  function lastWeek() { const mon = mondayOf(AP.today()); const from = AP.addDays(mon, -7); return { from: from, to: AP.addDays(mon, -1) }; }
+  function bilanView() {
+    const g = G(); const w = lastWeek();
+    const days = []; for (let i = 0; i < 7; i++) days.push(AP.addDays(w.from, i));
+    const act = days.map((d) => dayN(d));
+    const worked = act.filter((n) => n > 0).length;
+    const cardsDone = act.reduce((a, b) => a + b, 0);
+    const learned = Object.keys(AP.S.cards).filter((id) => { const c = AP.S.cards[id]; return c.k && c.k >= w.from && c.k <= w.to && AP.BY[id]; }).length;
+    const qs = AP.S.stats.quizzes.filter((q) => q.d >= w.from && q.d <= w.to);
+    const qAvg = qs.length ? Math.round(qs.reduce((a, x) => a + x.ok / x.n, 0) / qs.length * 100) : null;
+    const toeicQ = days.reduce((a, d) => a + (AP.S.toeic.days[d] || 0), 0);
+    const tl = toeicLeft();
+    let h = '<button class="back" data-act="go" data-to="progress">' + I.back + 'Mon suivi</button><div class="h1">Bilan de la semaine</div><p class="sub">Du ' + fmtDate(w.from) + ' au ' + fmtDate(w.to) + '</p>';
+    h += '<div class="card"><div class="wk">' + days.map((d, i) => '<div class="wd' + (act[i] > 0 ? ' on' : '') + '"><i></i><span>' + LET[i] + '</span></div>').join('') + '</div>' +
+      '<div class="td" style="margin:10px 0 0">' + worked + ' jour' + (worked > 1 ? 's' : '') + ' travaillé' + (worked > 1 ? 's' : '') + ' sur ' + g.days + ' visés' + (worked >= g.days ? ' : objectif atteint.' : ' : il en manquait ' + (g.days - worked) + '.') + '</div>' +
+      '<div class="mstats"><div><b>' + cardsDone + '</b><span>cartes travaillées</span></div><div><b>' + learned + '</b><span>nouvelles acquises</span></div><div><b>' + (qAvg === null ? '–' : qAvg + ' %') + '</b><span>réussite aux quiz</span></div></div></div>';
+    h += '<div class="h2">TOEIC</div><div class="card"><div class="td" style="margin:0">' + toeicQ + ' question' + (toeicQ > 1 ? 's' : '') + ' travaillée' + (toeicQ > 1 ? 's' : '') + ' cette semaine-là.' + (tl !== null && tl > 0 ? ' Examen dans ' + tl + ' jours.' : '') + '</div>' + weakToeic() + '</div>';
+    h += '<div class="h2">À reprendre en priorité</div><div class="card">' + weakWords() + '</div>';
+    const plan = [];
+    if (worked < g.days) plan.push('Bloquer ' + g.days + ' créneaux de 5 minutes (le rappel de 12 h 30 sert à cela).');
+    const cats = AP.S.toeic.cats; const wk = Object.keys(cats).filter((k) => cats[k].n >= 3).sort((a, b) => cats[a].ok / cats[a].n - cats[b].ok / cats[b].n)[0];
+    if (toeicQ < 20) plan.push('Faire au moins 20 questions TOEIC (onglet TOEIC).'); else if (wk) plan.push('Reprendre la règle TOEIC la plus fragile : ' + wk + '.');
+    if (qAvg !== null && qAvg < 70) plan.push('Refaire un quiz en niveau Difficile sur vos erreurs.');
+    plan.push('Faire une série dans S’entraîner > Parler (3 minutes à l’oral).');
+    h += '<div class="h2">Pour cette semaine</div><div class="card"><div class="list">' + plan.map((p) => '<div class="set"><div class="l"><b style="font-size:15px;font-weight:600">' + E(p) + '</b></div></div>').join('') + '</div></div>';
+    U.mount(h);
+  }
+  U.addRoute('bilan', 'progress', bilanView);
 
   U.addRoute('progress', 'progress', view);
 })();
