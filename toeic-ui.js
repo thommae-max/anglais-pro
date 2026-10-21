@@ -12,6 +12,7 @@
     const c = AP.S.toeic.cats[cat] || (AP.S.toeic.cats[cat] = { ok: 0, n: 0 });
     c.n += 1; if (good) c.ok += 1;
     AP.S.stats.days[AP.today()] = (AP.S.stats.days[AP.today()] || 0) + 1;
+    AP.S.toeic.days[AP.today()] = (AP.S.toeic.days[AP.today()] || 0) + 1;
     AP.save();
   }
   const acc = (c) => (c.n ? Math.round(c.ok / c.n * 100) : null);

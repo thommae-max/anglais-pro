@@ -30,9 +30,9 @@
     return {
       v: 1,
       cards: {},
-      settings: { accent: 'en-GB', rate: 1, goal: 12, direction: 'mix', autoplay: true, theme: 'auto', bannerHidden: false, pushSub: '', level: 'hard' },
+      settings: { accent: 'en-GB', rate: 1, goal: 12, direction: 'mix', autoplay: true, theme: 'auto', bannerHidden: false, pushSub: '', level: 'hard', goals: { days: 5, words: 500, wordsDate: '', toeic: 850, toeicNow: 750, toeicDate: '' } },
       stats: { days: {}, quizzes: [], sessions: 0 },
-      toeic: { cats: {}, tests: [] }
+      toeic: { cats: {}, tests: [], days: {}, scores: [] }
     };
   }
   AP.load = function () {
@@ -43,10 +43,11 @@
         const o = JSON.parse(raw);
         d.cards = o.cards || {};
         Object.assign(d.settings, o.settings || {});
+        d.settings.goals = Object.assign({ days: 5, words: 500, wordsDate: '', toeic: 850, toeicNow: 750, toeicDate: '' }, (o.settings && o.settings.goals) || {});
         d.stats.days = (o.stats && o.stats.days) || {};
         d.stats.quizzes = (o.stats && o.stats.quizzes) || [];
         d.stats.sessions = (o.stats && o.stats.sessions) || 0;
-        if (o.toeic) d.toeic = { cats: o.toeic.cats || {}, tests: o.toeic.tests || [] };
+        if (o.toeic) d.toeic = { cats: o.toeic.cats || {}, tests: o.toeic.tests || [], days: o.toeic.days || {}, scores: o.toeic.scores || [] };
       }
     } catch (e) { /* stockage indisponible */ }
     return d;
@@ -60,7 +61,7 @@
     d.stats.days = (o.stats && o.stats.days) || {};
     d.stats.quizzes = (o.stats && o.stats.quizzes) || [];
     d.stats.sessions = (o.stats && o.stats.sessions) || 0;
-    if (o.toeic) d.toeic = { cats: o.toeic.cats || {}, tests: o.toeic.tests || [] };
+    if (o.toeic) d.toeic = { cats: o.toeic.cats || {}, tests: o.toeic.tests || [], days: o.toeic.days || {}, scores: o.toeic.scores || [] };
     AP.S = d;
     AP.save();
   };
@@ -92,6 +93,7 @@
     if (res === 'ko') { c.b = 0; c.due = t; c.ko += 1; }
     else if (res === 'mid') { c.b = Math.max(c.b, 1); c.due = AP.addDays(t, 1); c.ok += 0; }
     else { c.b = Math.min(5, c.b + 1); c.due = AP.addDays(t, AP.INTERVALS[c.b]); c.ok += 1; }
+    if (c.b >= 3 && !c.k) c.k = t;
     AP.S.stats.days[t] = (AP.S.stats.days[t] || 0) + 1;
     AP.save();
   };

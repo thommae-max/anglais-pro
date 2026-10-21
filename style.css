@@ -218,3 +218,31 @@ textarea.code { width: 100%; min-height: 90px; border: 1.5px solid var(--line); 
 .lvl.hard { background: var(--mid-bg); color: var(--mid); }
 .lvl.expert { background: var(--ko-bg); color: var(--ko); }
 #tabbar a { font-size: 10.5px; }
+
+.gearbtn { width: 40px; height: 40px; border-radius: 50%; background: var(--soft); display: grid; place-items: center; color: var(--muted); flex: none; }
+.gearbtn svg { width: 22px; height: 22px; }
+.wk { display: flex; justify-content: space-between; gap: 6px; }
+.wd { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); font-weight: 700; }
+.wd i { width: 100%; max-width: 34px; aspect-ratio: 1; border-radius: 50%; background: var(--soft); display: block; }
+.wd.on i { background: var(--ok); }
+.wd.today i { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+.wd.fut { opacity: .5; }
+.mstats { display: flex; margin: 14px 0; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.mstats > div { flex: 1; text-align: center; }
+.mstats b { display: block; font-family: var(--serif); font-size: 24px; }
+.mstats span { font-size: 12px; color: var(--muted); }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.cl { aspect-ratio: 1; border-radius: 6px; background: var(--soft); display: block; }
+.cl.l1 { background: color-mix(in srgb, var(--ok) 35%, var(--soft)); }
+.cl.l2 { background: color-mix(in srgb, var(--ok) 65%, var(--soft)); }
+.cl.l3 { background: var(--ok); }
+.cl.lf { opacity: .35; }
+.cl.today { outline: 2px solid var(--accent); outline-offset: 1px; }
+.cl-leg { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 6px; }
+.bars { display: flex; align-items: flex-end; gap: 6px; height: 110px; }
+.bv { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; color: var(--muted); font-weight: 700; }
+.bv i { width: 100%; border-radius: 6px 6px 2px 2px; display: block; }
+.bv i.g { background: var(--ok); } .bv i.m { background: var(--mid); } .bv i.r { background: var(--ko); }
+.top { display: flex; align-items: center; justify-content: space-between; }
+.dt { border: 1.5px solid var(--line); background: var(--soft); border-radius: 10px; padding: 8px 10px; min-width: 130px; }
+#tabbar a { font-size: 10px; }

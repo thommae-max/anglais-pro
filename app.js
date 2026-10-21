@@ -20,6 +20,7 @@
     book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5zM4 5.5v16M8 7h8"/></svg>',
     gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
     play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
     target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>'
   };
 
@@ -53,7 +54,7 @@
     app.innerHTML = '<div class="' + an + '"' + (focus ? ' style="display:flex;flex-direction:column;flex:1"' : '') + '>' + html + '</div>';
     if (!focus && an) window.scrollTo(0, 0);
   }
-  const TABS = [['', 'Aujourd’hui', I.home], ['quiz', 'Quiz', I.quiz], ['toeic', 'TOEIC', I.target], ['ref', 'Référence', I.book], ['settings', 'Réglages', I.gear]];
+  const TABS = [['', 'Aujourd’hui', I.home], ['quiz', 'Quiz', I.quiz], ['toeic', 'TOEIC', I.target], ['progress', 'Progrès', I.chart], ['ref', 'Référence', I.book]];
   function buildTabs(active) {
     tabbar.innerHTML = TABS.map((t) => '<a href="#/' + t[0] + '" class="' + (active === t[0] ? 'on' : '') + '">' + t[2] + '<span>' + t[1] + '</span></a>').join('');
   }
@@ -109,7 +110,7 @@
     const streak = AP.streak();
     const hard = AP.ITEMS.filter((i) => AP.isHard(i.id)).length;
     const thObj = th ? AP.TH[th] : null;
-    let h = '<div class="top"><div><div class="hello">Bonjour Maëva</div><div class="date">' + dateFr() + '</div></div></div>';
+    let h = '<div class="top"><div><div class="hello">Bonjour Maëva</div><div class="date">' + dateFr() + '</div></div><button class="gearbtn" data-act="go" data-to="settings" aria-label="Réglages">' + I.gear + '</button></div>';
     h += '<div class="statrow">' +
       '<div class="stat"><svg class="ring" viewBox="0 0 46 46"><circle class="bg" cx="23" cy="23" r="18"/><circle class="fg" cx="23" cy="23" r="18" stroke-dasharray="' + (pct * C).toFixed(1) + ' ' + C.toFixed(1) + '"/></svg><div><b>' + done + '/' + goal + '</b><span>aujourd’hui</span></div></div>' +
       '<div class="stat">' + I.flame + '<div><b>' + streak + '</b><span>' + (streak > 1 ? 'jours d’affilée' : 'jour d’affilée') + '</span></div></div></div>';
@@ -118,6 +119,7 @@
       '<div class="d">' + (nothing ? 'Rien à réviser pour l’instant.' : 'Révision (' + p.due.length + ') · Leçon (' + p.nw.length + ') · Quiz de la leçon') + '</div>' +
       (nothing ? '<button class="btn" data-act="go" data-to="quiz">Faire un quiz</button>' : '<button class="btn" data-act="start" data-th="' + (th || '') + '">' + I.play + (done > 0 ? 'Continuer' : 'Commencer') + '</button>') + '</div>';
     if (done >= goal) h += '<p class="sub" style="margin-top:10px;text-align:center">Objectif du jour atteint, bravo ! Vous pouvez continuer.</p>';
+    if (AP.Prog) h += AP.Prog.summary();
     h += '<div class="btnrow" style="margin-top:12px"><button class="btn alt" data-act="revonly"' + (dueAll ? '' : ' disabled') + '>Réviser' + (dueAll ? ' (' + dueAll + ')' : '') + '</button>' +
       '<button class="btn alt" data-act="quickquiz">Quiz éclair</button></div>';
     h += '<div class="btnrow" style="margin-top:10px"><button class="btn alt" data-act="go" data-to="partner">Avec un partenaire</button>' +
