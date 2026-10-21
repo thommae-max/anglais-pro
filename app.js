@@ -81,7 +81,7 @@
     if (r === 'quiz') { buildTabs('quiz'); return parts[1] === 'run' ? viewQuizRun() : viewQuizSetup(); }
     if (r === 'ref') { buildTabs('ref'); return viewRef(); }
     if (r === 'fiche') { buildTabs('ref'); return viewFiche(parts[1]); }
-    if (r === 'theme') { buildTabs(''); return viewTheme(parts[1]); }
+    if (r === 'theme') { buildTabs('ref'); return viewTheme(parts[1]); }
     if (r === 'settings') { buildTabs('settings'); return viewSettings(); }
     buildTabs(''); return viewHome();
   }
@@ -486,23 +486,12 @@
       spk(it.en, 'sm') + (it.kind === 'fiche' ? '' : star(it.id)) + '</div>';
   }
 
+  function fichesOf(thId) { const o = {}; AP.ITEMS.forEach((i) => { if (i.theme === thId && i.fiche) o[i.fiche] = 1; }); return Object.keys(o); }
+
   function viewRef() {
-    let h = '<div class="h1">Apprendre</div>';
-    h += '<div class="seg"><button class="' + (refState.tab === 'search' ? 'on' : '') + '" data-act="reftab" data-v="search">Rechercher</button><button class="' + (refState.tab === 'fiches' ? 'on' : '') + '" data-act="reftab" data-v="fiches">Fiches de cours</button></div>';
-    if (refState.tab === 'fiches') {
-      AP.GROUPS.forEach((g) => {
-        h += '<div class="h2">' + E(g.g) + '</div>';
-        g.t.forEach((id) => {
-          const f = AP.FICHES.find((x) => x.id === id);
-          if (!f) return;
-          const n = AP.FICHES.indexOf(f) + 1;
-          const rows = (f.blocks || []).reduce((a, b) => a + (b.rows || []).length, 0);
-          h += '<button class="tile fiche" data-act="go" data-to="fiche/' + f.id + '"><span class="n">' + n + '</span><div><div class="tt" style="display:block">' + E(f.title.replace(/^Fiche \d+ · /, '')) + '</div><div class="td" style="margin:2px 0 0">' + rows + ' lignes</div></div></button>';
-        });
-      });
-      return mount(h);
-    }
-    h += '<div class="search">' + I.search + '<input id="q" type="search" placeholder="Un mot, une phrase, en anglais ou en français" value="' + E(refState.q) + '" autocomplete="off" autocapitalize="none" autocorrect="off" enterkeyhint="search"></div>';
+    const hasFilter = () => refState.q.trim() || refState.f !== 'all' || refState.th !== 'all';
+    let h = '<button class="back" data-act="go" data-to="ref">' + I.back + 'Apprendre</button><div class="h1">Dictionnaire</div><p class="sub">Trouvez un mot ou une phrase, en anglais ou en français.</p>';
+    h += '<div class="search">' + I.search + '<input id="q" type="search" placeholder="Ex. : contract, renouvellement, meeting…" value="' + E(refState.q) + '" autocomplete="off" autocapitalize="none" autocorrect="off" enterkeyhint="search"></div>';
     h += '<div class="chips">' + [['all', 'Tout'], ['word', 'Mots'], ['phrase', 'Phrases'], ['expression', 'Expressions'], ['fav', 'Favoris']].map((c) => '<button class="chip' + (refState.f === c[0] ? ' on' : '') + '" data-act="reff" data-v="' + c[0] + '">' + c[1] + '</button>').join('') + '</div>';
     h += '<div class="chips"><button class="chip' + (refState.th === 'all' ? ' on' : '') + '" data-act="refth" data-v="all">Tous thèmes</button>' + AP.THEMES.map((t) => '<button class="chip' + (refState.th === t.id ? ' on' : '') + '" data-act="refth" data-v="' + t.id + '">' + E(t.name) + '</button>').join('') + '</div>';
     h += '<div id="results"></div>';
@@ -513,6 +502,10 @@
   function fillResults() {
     const box = document.getElementById('results');
     if (!box) return;
+    if (!(refState.q.trim() || refState.f !== 'all' || refState.th !== 'all')) {
+      box.innerHTML = '<div class="empty" style="text-align:left"><b style="display:block;margin-bottom:6px">Tapez pour chercher</b>Essayez : ' + ['meeting', 'contract', 'renouvellement', 'pipeline', 'negotiate'].map((w) => '<button class="chip" style="display:inline-block;margin:2px" data-act="refq" data-v="' + w + '">' + w + '</button>').join('') + '<div style="margin-top:8px">Ou choisissez un filtre ci-dessus pour parcourir.</div></div>';
+      return;
+    }
     const res = search(refState.q);
     const shown = res.slice(0, refState.lim);
     let h = '<div class="sub" style="font-size:13px;margin:4px 2px 8px">' + res.length + ' résultat' + (res.length > 1 ? 's' : '') + '</div>';
@@ -524,8 +517,8 @@
 
   function viewFiche(id) {
     const f = AP.FICHES.find((x) => x.id === id);
-    if (!f) { nav('#/ref'); return; }
-    let h = '<button class="back" data-act="go" data-to="ref">' + I.back + 'Apprendre</button>';
+    if (!f) { nav('#/cours'); return; }
+    let h = '<button class="back" data-act="go" data-to="cours">' + I.back + 'Cours</button>';
     h += '<div class="h1" style="font-size:25px">' + E(f.title) + '</div><p class="sub">' + E(f.intro || '') + '</p>';
     (f.blocks || []).forEach((b) => {
       h += '<div class="fiche-block"><h3>' + E(b.h || '') + '</h3>' + (b.sub ? '<div class="sub" style="font-size:14px">' + E(b.sub) + '</div>' : '') + (b.tip ? '<div class="tip">' + E(b.tip) + '</div>' : '');
@@ -534,6 +527,8 @@
       }
       h += '</div>';
     });
+    const lt = AP.THEMES.filter((t) => fichesOf(t.id).indexOf(f.id) >= 0);
+    if (lt.length) h += '<div class="h2">Vocabulaire lié</div>' + lt.map((t) => '<button class="tile" data-act="go" data-to="theme/' + t.id + '"><div class="tt"><span>' + E(t.name) + '</span><span>›</span></div></button>').join('');
     if (f.sources) h += '<p class="help" style="margin-top:20px">Source : ' + E(f.sources) + '</p>';
     mount(h);
   }
@@ -548,13 +543,16 @@
     const items = AP.ITEMS.filter((i) => i.theme === id);
     const cats = {};
     items.forEach((i) => { (cats[i.cat] = cats[i.cat] || []).push(i); });
-    let h = '<button class="back" data-act="go" data-to="">' + I.back + 'Ma séance</button><div class="h1">' + E(t.name) + '</div><p class="sub">' + E(t.desc) + '</p>';
+    let h = '<button class="back" data-act="histback">' + I.back + 'Retour</button><div class="h1">' + E(t.name) + '</div><p class="sub">' + E(t.desc) + '</p>';
     h += '<div style="margin:14px 0"><div class="bar big"><i class="a" style="width:' + (s.known / s.total * 100) + '%"></i><i class="b" style="width:' + (s.learning / s.total * 100) + '%"></i></div>' +
       '<div class="td sub" style="font-size:13px;margin-top:6px">' + s.known + ' connus · ' + s.learning + ' en cours · ' + s.fresh + ' à découvrir · ' + s.due + ' à revoir</div></div>';
     h += '<div class="btnrow"><button class="btn" data-act="start" data-strict="1" data-th="' + id + '">Session</button><button class="btn alt" data-act="themequiz" data-th="' + id + '">Quiz</button></div>';
-    h += '<div class="h2">Contenu</div>';
+    const fl = fichesOf(id);
+    if (fl.length) h += '<div class="h2">Cours liés</div>' + fl.map((fid) => { const f = AP.FICHES.find((x) => x.id === fid); return f ? '<button class="tile" data-act="go" data-to="fiche/' + f.id + '"><div class="tt"><span>' + E(f.title.replace(/^Fiche \d+ · /, '')) + '</span><span>›</span></div></button>' : ''; }).join('');
+    h += '<div class="h2">Catégories</div><p class="help" style="margin-top:0">Chiffres : cartes acquises / total. Touchez une catégorie pour voir ses cartes, puis une carte pour la détailler.</p>';
     Object.keys(cats).forEach((c) => {
-      h += '<details class="cats"><summary><span>' + E(c) + '</span><small>' + cats[c].length + '</small></summary><div class="list">' + cats[c].map((i) => rowHTML(i)).join('') + '</div></details>';
+      const kn = cats[c].filter((i) => (AP.S.cards[i.id] && AP.S.cards[i.id].b >= 3)).length;
+      h += '<details class="cats"><summary><span>' + E(c) + '</span><small>' + kn + ' / ' + cats[c].length + '</small></summary><div class="list">' + cats[c].map((i) => rowHTML(i)).join('') + '</div></details>';
     });
     mount(h);
   }
@@ -642,7 +640,13 @@
       document.querySelectorAll('.star[data-id="' + el.dataset.id + '"]').forEach((b) => b.classList.toggle('on', on));
       toast(on ? 'Ajouté aux favoris' : 'Retiré des favoris');
     },
-    rowopen(el) { const r = el.closest('.row'); if (r) r.classList.toggle('open'); },
+    rowopen(el) {
+      const r = el.closest('.row'); if (!r) return;
+      const id = r.getAttribute('data-rid');
+      if (id && AP.BY[id]) nav('#/carte/' + id); else r.classList.toggle('open');
+    },
+    histback() { if (history.length > 1) history.back(); else nav('#/ref'); },
+    refq(el) { refState.q = el.dataset.v; refState.lim = 60; viewRef(); },
     hidebanner() { AP.S.settings.bannerHidden = true; AP.save(); viewHome(); },
     start(el) { startSession(el.dataset.th || null, null, !!el.dataset.strict); },
     revonly() { startSession(null, 'rev'); },
@@ -716,7 +720,6 @@
       qz = { ids: AP.shuffle(ids), i: 0, ok: 0, ko: 0, missed: [], mode: keep.mode, scope: keep.scope, practice: keep.practice, q: null, done: false };
       qz.q = makeQ(); viewQuizRun();
     },
-    reftab(el) { refState.tab = el.dataset.v; viewRef(); },
     reff(el) { refState.f = el.dataset.v; refState.lim = 60; viewRef(); },
     refth(el) { refState.th = el.dataset.v; refState.lim = 60; viewRef(); },
     morerefs() { refState.lim += 100; fillResults(); },
@@ -777,7 +780,7 @@
   AP.UI = {
     trainSeg: trainSeg,
     E: E, I: I, spk: spk, star: star, toast: toast, mount: mount, nav: nav, say: say, enCls: enCls, rowHTML: rowHTML,
-    poolFor: poolFor, A: A, bars: bars,
+    poolFor: poolFor, A: A, bars: bars, dico: viewRef, refState: refState, fichesOf: fichesOf,
     addRoute: function (name, tab, fn) { extra[name] = { tab: tab, fn: fn }; },
     route: route,
     rerenderNoAnim: function () { noAnim = true; }

@@ -1,6 +1,6 @@
 /* Anglais pro : service worker (hors ligne + notifications) */
-const CACHE = 'anglais-pro-v10';
-const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'core.js', 'quiz.js', 'config.js', 'content.js', 'toeic-data.js', 'partner.js', 'oral.js', 'progress.js', 'toeic-ui.js', 'toeic7-data.js', 'toeic7.js', 'main.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
+const CACHE = 'anglais-pro-v11';
+const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'core.js', 'quiz.js', 'config.js', 'content.js', 'toeic-data.js', 'partner.js', 'apprendre.js', 'oral.js', 'progress.js', 'toeic-ui.js', 'toeic7-data.js', 'toeic7.js', 'main.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
