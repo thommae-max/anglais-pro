@@ -351,6 +351,7 @@
     const pool = eligible(poolFor(qSetup.scope), qSetup.mode);
     const enough = pool.length >= 4;
     let h = '<div class="h1">Quiz</div><p class="sub">Testez ce qui est vraiment acquis. Les erreurs reviennent dans vos révisions.</p>';
+    h += '<button class="tile" style="margin-top:12px" data-act="go" data-to="oral"><div class="tt"><span>S’enregistrer à l’oral</span><span>›</span></div><div class="td" style="margin:2px 0 0">Dites une phrase, réécoutez-vous et comparez avec le modèle.</div></button>';
     h += '<button class="tile" style="margin-top:12px" data-act="go" data-to="partner"><div class="tt"><span>Entraînement avec un partenaire</span><span>›</span></div><div class="td" style="margin:2px 0 0">Quelqu’un vous fait réviser à l’oral, ou un jeu de rôle pour votre métier.</div></button>';
     h += '<div class="h2">Niveau de difficulté</div><div class="chips wrap">' + LEVELS.map((s) => '<button class="chip' + (AP.S.settings.level === s[0] ? ' on' : '') + '" data-act="qlevel" data-v="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>';
     h += '<p class="help" style="margin-top:0">' + ({ normal: 'Choix multiples surtout.', hard: 'Plus de saisie, de dictées et de phrases à compléter, avec des pièges proches.', expert: 'Aucun choix multiple : vous écrivez toutes vos réponses.' }[AP.S.settings.level]) + '</p>';

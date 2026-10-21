@@ -246,3 +246,7 @@ textarea.code { width: 100%; min-height: 90px; border: 1.5px solid var(--line); 
 .top { display: flex; align-items: center; justify-content: space-between; }
 .dt { border: 1.5px solid var(--line); background: var(--soft); border-radius: 10px; padding: 8px 10px; min-width: 130px; }
 #tabbar a { font-size: 10px; }
+
+.rec { display: flex; gap: 8px; align-items: center; justify-content: center; color: var(--ko); font-size: 16px; }
+.dotrec { width: 12px; height: 12px; border-radius: 50%; background: var(--ko); animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
