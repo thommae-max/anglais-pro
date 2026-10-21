@@ -14,16 +14,28 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
 <title>Anglais pro</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
-<div id="app" aria-live="polite"></div>
+<script>
+window.addEventListener('error', function (e) {
+  var a = document.getElementById('app');
+  if (!a) return;
+  var m = (e.message || 'erreur') + ' (' + String(e.filename || '').split('/').pop() + ':' + (e.lineno || '?') + ')';
+  a.innerHTML = '<div style="padding:24px;font-family:sans-serif"><b>Un problème est survenu</b><p style="color:#c0392b;word-break:break-word">' + m.replace(/</g, '&lt;') + '</p><p>Envoyez-moi une capture de cet écran.</p></div>';
+}, true);
+</script>
+<div id="app" aria-live="polite"><p style="padding:40px 20px;font-family:sans-serif;color:#6b7388">Chargement…</p></div>
 <nav id="tabbar" aria-label="Navigation principale"></nav>
 <div id="toast" role="status"></div>
-<script src="config.js"></script>
-<script src="content.js"></script>
-<script src="core.js"></script>
-<script src="quiz.js"></script>
-<script src="app.js"></script>
+<script src="config.js?v=4"></script>
+<script src="content.js?v=4"></script>
+<script src="toeic-data.js?v=4"></script>
+<script src="core.js?v=4"></script>
+<script src="quiz.js?v=4"></script>
+<script src="app.js?v=4"></script>
+<script src="partner.js?v=4"></script>
+<script src="toeic-ui.js?v=4"></script>
+<script src="main.js?v=4"></script>
 </body>
 </html>

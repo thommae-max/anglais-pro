@@ -208,3 +208,13 @@ textarea.code { width: 100%; min-height: 90px; border: 1.5px solid var(--line); 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 .fade { animation: fade .25s ease; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.phase { margin: -4px 0 6px; text-align: center; }
+.ph { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 3px 10px; border-radius: 99px; background: var(--soft); color: var(--muted); }
+.ph.rev { background: var(--mid-bg); color: var(--mid); }
+.ph.learn { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+.ph.quiz { background: var(--ok-bg); color: var(--ok); }
+.lvl { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .06em; padding: 2px 7px; border-radius: 99px; background: var(--soft); color: var(--muted); vertical-align: 1px; margin-left: 4px; }
+.lvl.hard { background: var(--mid-bg); color: var(--mid); }
+.lvl.expert { background: var(--ko-bg); color: var(--ko); }
+#tabbar a { font-size: 10.5px; }

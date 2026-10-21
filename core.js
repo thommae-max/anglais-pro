@@ -30,8 +30,9 @@
     return {
       v: 1,
       cards: {},
-      settings: { accent: 'en-GB', rate: 1, goal: 12, direction: 'mix', autoplay: true, theme: 'auto', bannerHidden: false, pushSub: '' },
-      stats: { days: {}, quizzes: [], sessions: 0 }
+      settings: { accent: 'en-GB', rate: 1, goal: 12, direction: 'mix', autoplay: true, theme: 'auto', bannerHidden: false, pushSub: '', level: 'hard' },
+      stats: { days: {}, quizzes: [], sessions: 0 },
+      toeic: { cats: {}, tests: [] }
     };
   }
   AP.load = function () {
@@ -45,6 +46,7 @@
         d.stats.days = (o.stats && o.stats.days) || {};
         d.stats.quizzes = (o.stats && o.stats.quizzes) || [];
         d.stats.sessions = (o.stats && o.stats.sessions) || 0;
+        if (o.toeic) d.toeic = { cats: o.toeic.cats || {}, tests: o.toeic.tests || [] };
       }
     } catch (e) { /* stockage indisponible */ }
     return d;
@@ -58,6 +60,7 @@
     d.stats.days = (o.stats && o.stats.days) || {};
     d.stats.quizzes = (o.stats && o.stats.quizzes) || [];
     d.stats.sessions = (o.stats && o.stats.sessions) || 0;
+    if (o.toeic) d.toeic = { cats: o.toeic.cats || {}, tests: o.toeic.tests || [] };
     AP.S = d;
     AP.save();
   };
@@ -178,10 +181,13 @@
   /* ---------- Audio (voix du téléphone) ---------- */
   AP.hasSpeech = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
   let voices = [];
+  let keep = null;           // référence gardée : évite que iOS coupe la voix
+  let seqId = 0;
   function loadVoices() { try { voices = window.speechSynthesis.getVoices() || []; } catch (e) { voices = []; } }
-  if (AP.hasSpeech) { loadVoices(); window.speechSynthesis.onvoiceschanged = loadVoices; }
+  if (AP.hasSpeech) { loadVoices(); try { window.speechSynthesis.onvoiceschanged = loadVoices; } catch (e) { /* ignore */ } }
   function voiceScore(v) { return (/premium|enhanced|siri/i.test(v.name) ? 2 : 0) + (v.localService ? 1 : 0); }
   function pickVoice() {
+    if (!voices.length) loadVoices();
     const lang = AP.S.settings.accent.toLowerCase();
     const same = (v) => (v.lang || '').replace('_', '-').toLowerCase();
     let c = voices.filter((v) => same(v) === lang);
@@ -190,22 +196,69 @@
     return c[0] || null;
   }
   AP.speakText = (en) => String(en).replace(/___/g, 'blank').replace(/\s\/\s/g, ', ').replace(/\s+—\s+/g, '. ').replace(/\s+/g, ' ').trim();
-  AP.speak = function (text) {
-    if (!AP.hasSpeech) { return false; }
+  function utter(text, rate, onend) {
+    const u = new SpeechSynthesisUtterance(AP.speakText(text));
+    u.lang = AP.S.settings.accent;
+    const v = pickVoice();
+    if (v) u.voice = v;
+    u.rate = rate || AP.S.settings.rate;
+    u.onend = function () { if (onend) onend(); };
+    u.onerror = function () { if (onend) onend(); };
+    keep = u;
+    return u;
+  }
+  function fire(u) {
+    const ss = window.speechSynthesis;
+    try { ss.resume(); } catch (e) { /* ignore */ }
+    ss.speak(u);
+  }
+  /* Lit un texte. Retourne false si l'audio n'existe pas sur l'appareil. */
+  AP.speak = function (text, rate) {
+    if (!AP.hasSpeech) return false;
+    seqId++;
     try {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(AP.speakText(text));
-      u.lang = AP.S.settings.accent;
-      const v = pickVoice();
-      if (v) u.voice = v;
-      u.rate = AP.S.settings.rate;
-      window.speechSynthesis.speak(u);
+      const ss = window.speechSynthesis;
+      const busy = ss.speaking || ss.pending;
+      if (busy) ss.cancel();
+      const u = utter(text, rate);
+      if (busy) setTimeout(() => fire(u), 140); else fire(u);
       return true;
     } catch (e) { return false; }
   };
+  /* Lit plusieurs textes à la suite (écoute TOEIC) ; gap en millisecondes */
+  AP.speakSeq = function (list, gap, done) {
+    if (!AP.hasSpeech) return false;
+    const my = ++seqId;
+    try {
+      const ss = window.speechSynthesis;
+      const busy = ss.speaking || ss.pending;
+      if (busy) ss.cancel();
+      let i = 0;
+      const next = () => {
+        if (my !== seqId) return;
+        if (i >= list.length) { if (done) done(); return; }
+        const item = list[i++];
+        const u = utter(item, 0.95, () => setTimeout(next, gap || 700));
+        fire(u);
+      };
+      if (busy) setTimeout(next, 140); else next();
+      return true;
+    } catch (e) { return false; }
+  };
+  AP.stopSpeech = function () { seqId++; try { if (AP.hasSpeech) window.speechSynthesis.cancel(); } catch (e) { /* ignore */ } };
+  /* Réparation du son : vide la file et recharge les voix */
+  AP.repairAudio = function () {
+    if (!AP.hasSpeech) return false;
+    seqId++;
+    try { window.speechSynthesis.cancel(); } catch (e) { /* ignore */ }
+    keep = null; voices = [];
+    loadVoices();
+    setTimeout(() => { loadVoices(); AP.speak('Audio check. Can you hear me clearly?'); }, 300);
+    return true;
+  };
 
   /* ---------- Sauvegarde ---------- */
-  AP.exportCode = () => btoa(unescape(encodeURIComponent(JSON.stringify({ cards: AP.S.cards, settings: AP.S.settings, stats: AP.S.stats }))));
+  AP.exportCode = () => btoa(unescape(encodeURIComponent(JSON.stringify({ cards: AP.S.cards, settings: AP.S.settings, stats: AP.S.stats, toeic: AP.S.toeic }))));
   AP.importCode = function (code) {
     const o = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
     if (!o || typeof o.cards !== 'object') throw new Error('format');
