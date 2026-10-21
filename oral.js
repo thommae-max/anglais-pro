@@ -20,7 +20,7 @@
   function view() {
     if (st.run) return viewRun();
     const items = pool();
-    let h = '<button class="back" data-act="go" data-to="quiz">' + I.back + 'Quiz</button><div class="h1">À l’oral</div>';
+    let h = '<button class="back" data-act="go" data-to="parler">' + I.back + 'Parler</button><div class="h1">À l’oral</div>';
     h += '<div class="card"><b>Comment ça marche</b><p class="sub" style="font-size:14px;margin-top:4px">Écoutez le modèle, enregistrez-vous, réécoutez-vous et comparez. Vous notez vous-même votre prononciation. Les enregistrements restent sur votre téléphone et disparaissent quand vous fermez l’app.</p></div>';
     if (!supported()) h += '<div class="note" style="margin-top:12px"><b>Micro indisponible</b>Ce navigateur ne permet pas l’enregistrement. Ouvrez l’app depuis l’icône de l’écran d’accueil sur iPhone (iOS 16.4 ou plus récent).</div>';
     h += '<div class="h2">Quoi dire ?</div><div class="chips wrap">' + SCOPES.map((s) => '<button class="chip' + (st.scope === s[0] ? ' on' : '') + '" data-act="oset" data-k="scope" data-v="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>';
@@ -138,10 +138,20 @@
     AP.grade(id, g);
     advance();
   };
-  A.oquit = () => { cleanup(); st.run = null; U.nav('#/quiz'); };
-  A.oend = () => { cleanup(); st.run = null; U.nav('#/quiz'); };
+  A.oquit = () => { cleanup(); st.run = null; U.nav('#/parler'); };
+  A.oend = () => { cleanup(); st.run = null; U.nav('#/parler'); };
   A.oagain = () => { cleanup(); start(); };
   window.addEventListener('hashchange', () => { if (rc.recording) stopRec(true); });
 
+  function hub() {
+    let h = '<div class="h1">S’entraîner</div>' + U.trainSeg('parler');
+    h += '<p class="sub" style="margin:12px 0">Travaillez l’oral : seule avec l’app, ou avec quelqu’un qui vous fait réviser.</p>';
+    const tile = (act, extra, t, d) => '<button class="tile" data-act="' + act + '" ' + extra + '><div class="tt"><span>' + t + '</span><span>›</span></div><div class="td" style="margin:2px 0 0">' + d + '</div></button>';
+    h += tile('go', 'data-to="oral"', 'M’enregistrer', 'Dites une phrase, réécoutez-vous et comparez avec le modèle.');
+    h += tile('pgoto', 'data-v="role"', 'Jeux de rôle métier', 'Dix situations : comité de direction, négociation, entretien, appel…');
+    h += tile('pgoto', 'data-v="qa"', 'Me faire réviser par quelqu’un', 'Vous donnez le téléphone : la personne lit les questions, vous répondez à l’oral.');
+    U.mount(h);
+  }
+  U.addRoute('parler', 'quiz', hub);
   U.addRoute('oral', 'quiz', view);
 })();

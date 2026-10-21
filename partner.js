@@ -71,7 +71,7 @@
   /* ---------- Écran de réglage ---------- */
   function view() {
     if (st.run) return viewRun();
-    let h = '<button class="back" data-act="go" data-to="quiz">' + I.back + 'Quiz</button><div class="h1">Avec un partenaire</div>';
+    let h = '<button class="back" data-act="go" data-to="parler">' + I.back + 'Parler</button><div class="h1">Avec un partenaire</div>';
     h += '<div class="seg"><button class="' + (st.tab === 'qa' ? 'on' : '') + '" data-act="ptab" data-v="qa">Questions à l’oral</button><button class="' + (st.tab === 'role' ? 'on' : '') + '" data-act="ptab" data-v="role">Jeux de rôle</button></div>';
     if (st.tab === 'role') return U.mount(h + rolesList());
     const items = pool();
@@ -178,5 +178,6 @@
     shareOrCopy(t, r.t);
   };
 
+  A.pgoto = (el) => { st.tab = el.dataset.v; U.nav('#/partner'); };
   U.addRoute('partner', 'quiz', view);
 })();

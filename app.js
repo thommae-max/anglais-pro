@@ -54,7 +54,7 @@
     app.innerHTML = '<div class="' + an + '"' + (focus ? ' style="display:flex;flex-direction:column;flex:1"' : '') + '>' + html + '</div>';
     if (!focus && an) window.scrollTo(0, 0);
   }
-  const TABS = [['', 'Aujourd’hui', I.home], ['quiz', 'Quiz', I.quiz], ['toeic', 'TOEIC', I.target], ['progress', 'Progrès', I.chart], ['ref', 'Référence', I.book]];
+  const TABS = [['', 'Ma séance', I.home], ['ref', 'Apprendre', I.book], ['quiz', 'S’entraîner', I.quiz], ['toeic', 'TOEIC', I.target], ['progress', 'Mon suivi', I.chart]];
   function buildTabs(active) {
     tabbar.innerHTML = TABS.map((t) => '<a href="#/' + t[0] + '" class="' + (active === t[0] ? 'on' : '') + '">' + t[2] + '<span>' + t[1] + '</span></a>').join('');
   }
@@ -122,7 +122,7 @@
     if (AP.Prog) h += AP.Prog.summary();
     h += '<div class="btnrow" style="margin-top:12px"><button class="btn alt" data-act="revonly"' + (dueAll ? '' : ' disabled') + '>Réviser' + (dueAll ? ' (' + dueAll + ')' : '') + '</button>' +
       '<button class="btn alt" data-act="quickquiz">Quiz éclair</button></div>';
-    h += '<div class="btnrow" style="margin-top:10px"><button class="btn alt" data-act="go" data-to="partner">Avec un partenaire</button>' +
+    h += '<div class="btnrow" style="margin-top:10px"><button class="btn alt" data-act="go" data-to="parler">Parler</button>' +
       '<button class="btn alt" data-act="hardquiz"' + (hard ? '' : ' disabled') + '>Mes difficiles' + (hard ? ' (' + hard + ')' : '') + '</button></div>';
     if (!standalone() && !AP.S.settings.bannerHidden) {
       h += '<div class="note" style="margin-top:14px"><button class="x" data-act="hidebanner" aria-label="Fermer">×</button><b>Installer l’app sur l’iPhone</b>Dans Safari : bouton Partager, puis « Sur l’écran d’accueil ». C’est nécessaire pour les rappels.</div>';
@@ -347,12 +347,15 @@
     return items.filter((i) => AP.Q.types(i, lvl).some((t) => GR[mode].indexOf(t) >= 0));
   }
 
+  function trainSeg(on) {
+    return '<div class="seg" style="margin-top:12px"><button class="' + (on === 'quiz' ? 'on' : '') + '" data-act="go" data-to="quiz">Quiz</button><button class="' + (on === 'parler' ? 'on' : '') + '" data-act="go" data-to="parler">Parler</button></div>';
+  }
+
   function viewQuizSetup() {
     const pool = eligible(poolFor(qSetup.scope), qSetup.mode);
     const enough = pool.length >= 4;
-    let h = '<div class="h1">Quiz</div><p class="sub">Testez ce qui est vraiment acquis. Les erreurs reviennent dans vos révisions.</p>';
-    h += '<button class="tile" style="margin-top:12px" data-act="go" data-to="oral"><div class="tt"><span>S’enregistrer à l’oral</span><span>›</span></div><div class="td" style="margin:2px 0 0">Dites une phrase, réécoutez-vous et comparez avec le modèle.</div></button>';
-    h += '<button class="tile" style="margin-top:12px" data-act="go" data-to="partner"><div class="tt"><span>Entraînement avec un partenaire</span><span>›</span></div><div class="td" style="margin:2px 0 0">Quelqu’un vous fait réviser à l’oral, ou un jeu de rôle pour votre métier.</div></button>';
+    let h = '<div class="h1">S’entraîner</div><p class="sub">Quiz : testez ce qui est vraiment acquis. Les erreurs reviennent dans vos révisions.</p>';
+    h += trainSeg('quiz');
     h += '<div class="h2">Niveau de difficulté</div><div class="chips wrap">' + LEVELS.map((s) => '<button class="chip' + (AP.S.settings.level === s[0] ? ' on' : '') + '" data-act="qlevel" data-v="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>';
     h += '<p class="help" style="margin-top:0">' + ({ normal: 'Choix multiples surtout.', hard: 'Plus de saisie, de dictées et de phrases à compléter, avec des pièges proches.', expert: 'Aucun choix multiple : vous écrivez toutes vos réponses.' }[AP.S.settings.level]) + '</p>';
     h += '<div class="h2">Sur quoi ?</div><div class="chips wrap">' + SCOPES.map((s) => '<button class="chip' + (qSetup.scope === s[0] ? ' on' : '') + '" data-act="qs" data-k="scope" data-v="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>';
@@ -484,7 +487,7 @@
   }
 
   function viewRef() {
-    let h = '<div class="h1">Référence</div>';
+    let h = '<div class="h1">Apprendre</div>';
     h += '<div class="seg"><button class="' + (refState.tab === 'search' ? 'on' : '') + '" data-act="reftab" data-v="search">Rechercher</button><button class="' + (refState.tab === 'fiches' ? 'on' : '') + '" data-act="reftab" data-v="fiches">Fiches de cours</button></div>';
     if (refState.tab === 'fiches') {
       AP.GROUPS.forEach((g) => {
@@ -522,7 +525,7 @@
   function viewFiche(id) {
     const f = AP.FICHES.find((x) => x.id === id);
     if (!f) { nav('#/ref'); return; }
-    let h = '<button class="back" data-act="go" data-to="ref">' + I.back + 'Référence</button>';
+    let h = '<button class="back" data-act="go" data-to="ref">' + I.back + 'Apprendre</button>';
     h += '<div class="h1" style="font-size:25px">' + E(f.title) + '</div><p class="sub">' + E(f.intro || '') + '</p>';
     (f.blocks || []).forEach((b) => {
       h += '<div class="fiche-block"><h3>' + E(b.h || '') + '</h3>' + (b.sub ? '<div class="sub" style="font-size:14px">' + E(b.sub) + '</div>' : '') + (b.tip ? '<div class="tip">' + E(b.tip) + '</div>' : '');
@@ -545,7 +548,7 @@
     const items = AP.ITEMS.filter((i) => i.theme === id);
     const cats = {};
     items.forEach((i) => { (cats[i.cat] = cats[i.cat] || []).push(i); });
-    let h = '<button class="back" data-act="go" data-to="">' + I.back + 'Aujourd’hui</button><div class="h1">' + E(t.name) + '</div><p class="sub">' + E(t.desc) + '</p>';
+    let h = '<button class="back" data-act="go" data-to="">' + I.back + 'Ma séance</button><div class="h1">' + E(t.name) + '</div><p class="sub">' + E(t.desc) + '</p>';
     h += '<div style="margin:14px 0"><div class="bar big"><i class="a" style="width:' + (s.known / s.total * 100) + '%"></i><i class="b" style="width:' + (s.learning / s.total * 100) + '%"></i></div>' +
       '<div class="td sub" style="font-size:13px;margin-top:6px">' + s.known + ' connus · ' + s.learning + ' en cours · ' + s.fresh + ' à découvrir · ' + s.due + ' à revoir</div></div>';
     h += '<div class="btnrow"><button class="btn" data-act="start" data-strict="1" data-th="' + id + '">Session</button><button class="btn alt" data-act="themequiz" data-th="' + id + '">Quiz</button></div>';
@@ -772,6 +775,7 @@
 
   /* ---------- Interface partagée avec les autres modules ---------- */
   AP.UI = {
+    trainSeg: trainSeg,
     E: E, I: I, spk: spk, star: star, toast: toast, mount: mount, nav: nav, say: say, enCls: enCls, rowHTML: rowHTML,
     poolFor: poolFor, A: A, bars: bars,
     addRoute: function (name, tab, fn) { extra[name] = { tab: tab, fn: fn }; },

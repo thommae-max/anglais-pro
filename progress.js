@@ -65,7 +65,7 @@
 
   function quizChart() {
     const qs = AP.S.stats.quizzes.slice(-10);
-    if (!qs.length) return '<p class="sub" style="font-size:14px">Aucun quiz pour l’instant. Lancez-en un depuis l’onglet Quiz.</p>';
+    if (!qs.length) return '<p class="sub" style="font-size:14px">Aucun quiz pour l’instant. Lancez-en un depuis l’onglet S’entraîner.</p>';
     const avg = (a) => (a.length ? Math.round(a.reduce((s, x) => s + x.ok / x.n, 0) / a.length * 100) : null);
     const last5 = avg(qs.slice(-5)); const prev5 = qs.length > 5 ? avg(qs.slice(-10, -5)) : null;
     let h = '<div class="bars">' + qs.map((x) => { const p = Math.round(x.ok / x.n * 100); return '<div class="bv"><i style="height:' + Math.max(6, p) + '%" class="' + (p >= 80 ? 'g' : p >= 60 ? 'm' : 'r') + '"></i><span>' + p + '</span></div>'; }).join('') + '</div>';
@@ -129,7 +129,7 @@
     const wc = weekCount(); const days = AP.S.stats.days;
     const total = Object.keys(days).filter((d) => days[d] > 0).length;
     const t = AP.totals();
-    let h = '<div class="top"><div class="h1" style="margin:0">Progrès</div><button class="gearbtn" data-act="go" data-to="settings" aria-label="Réglages">' + I.gear + '</button></div>';
+    let h = '<div class="top"><div class="h1" style="margin:0">Mon suivi</div><button class="gearbtn" data-act="go" data-to="settings" aria-label="Réglages">' + I.gear + '</button></div>';
     h += '<div class="h2" style="margin-top:6px">Régularité</div><div class="card">' + weekDots() +
       '<div class="td" style="margin:10px 0 0">' + wc + ' jour' + (wc > 1 ? 's' : '') + ' travaillé' + (wc > 1 ? 's' : '') + ' cette semaine sur ' + g.days + ' visés' + (wc >= g.days ? ' : objectif atteint' : '') + '</div>' +
       '<div class="mstats"><div><b>' + AP.streak() + '</b><span>série en cours</span></div><div><b>' + bestStreak() + '</b><span>meilleure série</span></div><div><b>' + total + '</b><span>jours au total</span></div></div>' + calendar() + '</div>';

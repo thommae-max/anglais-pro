@@ -1,5 +1,5 @@
 /* Anglais pro : service worker (hors ligne + notifications) */
-const CACHE = 'anglais-pro-v6';
+const CACHE = 'anglais-pro-v7';
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'core.js', 'quiz.js', 'config.js', 'content.js', 'toeic-data.js', 'partner.js', 'oral.js', 'progress.js', 'toeic-ui.js', 'main.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {
