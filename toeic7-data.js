@@ -1,0 +1,91 @@
+/* Anglais pro : textes pour la partie 7 du TOEIC (lecture). Textes et questions originaux, dans le style de l'examen. */
+window.TOEIC = window.TOEIC || {};
+window.TOEIC.p7 = [
+  {
+    id: 'r1', kind: 'E-mail', title: 'Delay to your onboarding',
+    text: 'To: Laura Benson\nFrom: Marc Ellis, Customer Success\nSubject: Delay to your onboarding\n\nDear Ms. Benson,\n\nThank you for choosing Nuvia. I am writing to let you know that your onboarding session, originally planned for Tuesday 4 March, has to be moved. Our integration team is still waiting for the data export from your previous provider, and we cannot configure your account without it.\n\nWe can offer you a new session on Monday 10 March at 10:00. If your export arrives before the end of this week, we will also be able to start the technical setup early. Please let me know whether the new date suits you.\n\nWe apologise for the inconvenience.\n\nBest regards,\nMarc Ellis',
+    qs: [
+      { cat: 'Objet et idée principale', q: 'Why is Mr. Ellis writing to Ms. Benson?', a: 'To announce a change of date', w: ['To confirm a contract renewal', 'To request payment of an invoice', 'To introduce a new colleague'], e: 'Le mail annonce que la séance du 4 mars « has to be moved » et propose une nouvelle date. L’objet est donc un changement de date.' },
+      { cat: 'Détail précis', q: 'What is causing the delay?', a: 'A missing data export', w: ['A technical failure on the platform', 'The absence of a team member', 'A change in the contract terms'], e: 'La cause est donnée dans la première partie : « still waiting for the data export from your previous provider ».' },
+      { cat: 'Inférence', q: 'What is suggested about the new session?', a: 'It could be preceded by an earlier technical step.', w: ['It will take place online only.', 'It has already been confirmed by Ms. Benson.', 'It will be led by a different company.'], e: 'Si l’export arrive avant la fin de la semaine, l’équipe pourra « start the technical setup early » : une étape technique pourrait donc avoir lieu avant. Le mail demande l’accord de Mme Benson, il n’est donc pas encore confirmé.' }
+    ]
+  },
+  {
+    id: 'r2', kind: 'Note interne', title: 'Travel and expense policy',
+    text: 'MEMO\nTo: All sales staff\nFrom: Finance Department\nDate: 12 May\nRe: Updated travel and expense policy\n\nEffective 1 June, all business trips costing more than 500 euros must be approved by your regional director before booking. Train travel is preferred for journeys under four hours. Flights in business class are no longer reimbursed, except for trips longer than eight hours.\n\nExpense reports must be submitted within ten working days of your return, together with original receipts. Reports sent after this deadline will be processed with the following month’s payroll.\n\nQuestions should be addressed to expenses@corvel.example.',
+    qs: [
+      { cat: 'Objet et idée principale', q: 'What is the purpose of the memo?', a: 'To inform staff of new rules', w: ['To announce a reduction in staff', 'To advertise a new travel agency', 'To report last quarter’s expenses'], e: 'Le mémo présente une politique mise à jour (« Updated travel and expense policy ») qui s’applique à partir du 1er juin.' },
+      { cat: 'Détail précis', q: 'When must a trip be approved by the regional director?', a: 'When it costs more than 500 euros', w: ['When it lasts longer than four hours', 'When it involves a flight', 'When it takes place in June'], e: 'Phrase clé : « trips costing more than 500 euros must be approved ». Le seuil de quatre heures concerne la préférence pour le train, pas l’approbation.' },
+      { cat: 'Information NON mentionnée', q: 'What is NOT stated in the memo?', a: 'The maximum amount for hotel rooms', w: ['The deadline for expense reports', 'The conditions for business class', 'The contact address for questions'], e: 'Le délai (dix jours ouvrés), la classe affaires (plus de huit heures) et l’adresse e-mail sont mentionnés. Aucun plafond pour les hôtels n’est indiqué.' },
+      { cat: 'Vocabulaire en contexte', q: 'The word “processed” in paragraph 2 is closest in meaning to', a: 'handled', w: ['improved', 'delayed', 'cancelled'], e: '« Processed with the following month’s payroll » signifie « traités avec la paie du mois suivant » : handled. Attention, le sens est neutre : le retard vient de la date, pas du mot.' }
+    ]
+  },
+  {
+    id: 'r3', kind: 'Article', title: 'Local software firm opens second office',
+    text: 'BRIGHTON — Calder Systems, a software company founded eight years ago by two former university classmates, announced yesterday that it will open a second office in Manchester this autumn. The company, which currently employs 120 people, expects to hire 40 more engineers and sales specialists over the next year.\n\n“Demand from retail clients in the north of England has grown faster than we planned,” said co-founder Priya Nair. “Being closer to them will help us respond more quickly.” The new site will also house a training centre for customers.\n\nCalder Systems reported revenue of 14 million pounds last year, an increase of 22 percent. Ms. Nair said the company has no plans to go public in the near future.',
+    qs: [
+      { cat: 'Objet et idée principale', q: 'What is the article mainly about?', a: 'A company’s plan to expand', w: ['A merger between two competitors', 'The launch of a new product', 'A change in company leadership'], e: 'Le sujet central est l’ouverture d’un second bureau à Manchester : une expansion.' },
+      { cat: 'Détail précis', q: 'How many people does Calder Systems employ now?', a: '120', w: ['40', '160', '14'], e: '« Currently employs 120 people ». Le chiffre 40 correspond aux embauches prévues, 14 millions au chiffre d’affaires. 160 est un piège (120 + 40) : il ne s’agit pas de l’effectif actuel.' },
+      { cat: 'Détail précis', q: 'According to Ms. Nair, why is the company opening a new office?', a: 'To be closer to its clients', w: ['To reduce its costs', 'To prepare for a stock market listing', 'To replace its original office'], e: '« Being closer to them will help us respond more quickly ». La phrase sur la Bourse dit au contraire que l’entreprise n’a pas de projet d’introduction.' },
+      { cat: 'Inférence', q: 'What can be inferred about Calder Systems?', a: 'Its business is growing.', w: ['It is losing clients in the north.', 'It will close its first office.', 'It was founded by a large corporation.'], e: 'Revenus en hausse de 22 %, demande en croissance et 40 recrutements prévus : l’activité se développe.' }
+    ]
+  },
+  {
+    id: 'r4', kind: 'Messages', title: 'Team chat',
+    text: 'Dan Moreau (09:12): Hi Sofia, are you still joining the client call at 10?\n\nSofia Reyes (09:14): Yes, but I’m stuck in traffic. I should be online by 10:05 at the latest.\n\nDan Moreau (09:15): No problem. I’ll start with the introductions and the agenda. Can you take the pricing section?\n\nSofia Reyes (09:17): Sure. The latest figures are in the shared folder, in the file called “Q3 proposal v2”.\n\nDan Moreau (09:18): Great, I see it. I’ll also forward the link to the client just in case.\n\nSofia Reyes (09:19): Perfect. Thanks for covering for me.',
+    qs: [
+      { cat: 'Vocabulaire en contexte', q: 'At 09:19, what does Ms. Reyes mean when she writes “Thanks for covering for me”?', a: 'Thank you for starting without me.', w: ['Thank you for paying my expenses.', 'Thank you for sending me the file.', 'Thank you for cancelling the meeting.'], e: '« Cover for someone » = assurer à la place de quelqu’un. Dan commence l’appel en attendant l’arrivée de Sofia.' },
+      { cat: 'Détail précis', q: 'What will Ms. Reyes present during the call?', a: 'The pricing', w: ['The introductions', 'The agenda', 'The contract'], e: 'Dan lui demande : « Can you take the pricing section? » Elle répond « Sure ». Dan se charge des présentations et de l’ordre du jour.' },
+      { cat: 'Inférence', q: 'Why does Mr. Moreau say he will forward the link to the client?', a: 'To make sure the client can see the figures', w: ['To invite the client to join the call', 'To report a mistake in the file', 'To change the time of the meeting'], e: 'Le lien mène au dossier partagé contenant les chiffres. Dan l’envoie « just in case » : par précaution, pour que le client puisse les voir.' }
+    ]
+  },
+  {
+    id: 'r5', kind: 'Offre d’emploi', title: 'Account Executive – Enterprise',
+    text: 'JOIN OUR SALES TEAM\n\nHarbor Cloud is looking for an Account Executive to manage relationships with large clients in the financial sector.\n\nResponsibilities:\n• Lead the full sales cycle, from first contact to contract signature\n• Build long-term relationships with senior decision-makers\n• Work with the product team to prepare tailored demonstrations\n\nRequirements:\n• At least five years of experience selling software to large organisations\n• Proven record of meeting or exceeding annual targets\n• Fluent English; knowledge of German is an advantage\n\nWe offer a competitive base salary, a quarterly bonus and the possibility of working from home three days a week. Applications should be sent before 30 April.',
+    qs: [
+      { cat: 'Objet et idée principale', q: 'What is the purpose of the notice?', a: 'To recruit a sales professional', w: ['To promote a software product', 'To announce a new client', 'To explain a training programme'], e: 'C’est une offre d’emploi : l’entreprise cherche un Account Executive.' },
+      { cat: 'Détail précis', q: 'What is required of applicants?', a: 'Experience selling to large organisations', w: ['A degree in finance', 'Fluency in German', 'Experience in product design'], e: 'Exigence : « at least five years of experience selling software to large organisations ». L’allemand n’est qu’un « advantage », pas une obligation.' },
+      { cat: 'Information NON mentionnée', q: 'Which benefit is NOT mentioned?', a: 'A company car', w: ['A quarterly bonus', 'Remote work', 'A competitive base salary'], e: 'Sont cités : salaire fixe, prime trimestrielle, trois jours de télétravail. Aucune voiture de fonction.' },
+      { cat: 'Vocabulaire en contexte', q: 'The word “tailored” in the first list is closest in meaning to', a: 'customised', w: ['expensive', 'standard', 'short'], e: '« Tailored demonstrations » = démonstrations adaptées au client. Customised est le synonyme ; « standard » en est le contraire.' }
+    ]
+  },
+  {
+    id: 'r6', kind: 'E-mail', title: 'Renewal proposal',
+    text: 'To: Hannah Kowalski\nFrom: Oliver Grant\nSubject: Renewal proposal – Delta Logistics\n\nHi Hannah,\n\nThank you for your time on Thursday. As promised, I am attaching the renewal proposal for the next twelve months.\n\nAs we discussed, the price per user will rise by 4 percent, in line with the increase in our hosting costs. In return, we have added the reporting module at no extra charge and extended support hours until 8 p.m.\n\nIf you confirm by 15 June, we can keep your current discount of 10 percent. After that date, the standard rate will apply.\n\nI would be glad to answer any question your finance team may have.\n\nKind regards,\nOliver',
+    qs: [
+      { cat: 'Objet et idée principale', q: 'What is the main purpose of the e-mail?', a: 'To send a renewal offer', w: ['To cancel a subscription', 'To report a technical incident', 'To ask for a reference'], e: 'Oliver joint « the renewal proposal for the next twelve months » : l’objet est l’envoi d’une offre de renouvellement.' },
+      { cat: 'Détail précis', q: 'Why will the price per user increase?', a: 'Hosting costs have risen.', w: ['A new module has been added.', 'Support hours have been shortened.', 'The discount has expired.'], e: 'Le texte précise : « in line with the increase in our hosting costs ». Le module de reporting est offert, il n’explique donc pas la hausse.' },
+      { cat: 'Détail précis', q: 'What must Ms. Kowalski do by 15 June to keep her discount?', a: 'Confirm the renewal', w: ['Pay the invoice', 'Meet the finance team', 'Attend a training session'], e: '« If you confirm by 15 June, we can keep your current discount of 10 percent. »' },
+      { cat: 'Inférence', q: 'What is implied about Delta Logistics?', a: 'It is already a customer.', w: ['It is a new prospect.', 'It has refused the offer.', 'It is a competitor of Oliver’s company.'], e: 'On parle de renouvellement (« renewal ») et de remise « current » : Delta Logistics est déjà cliente.' }
+    ]
+  },
+  {
+    id: 'r7', kind: 'Avis', title: 'Scheduled system maintenance',
+    text: 'NOTICE TO ALL EMPLOYEES\n\nThe IT department will carry out scheduled maintenance on the company network this Saturday, from 10 p.m. until 6 a.m. on Sunday. During this period, e-mail, the customer database and the file-sharing platform will be unavailable.\n\nPlease save your work and log out before leaving the office on Friday. Employees who need access to the system over the weekend should contact the IT help desk before Thursday noon to arrange temporary access.\n\nWe apologise for any inconvenience and thank you for your cooperation.',
+    qs: [
+      { cat: 'Détail précis', q: 'What will be unavailable on Saturday night?', a: 'The company network services', w: ['The IT help desk phone line', 'The company’s building', 'Only the e-mail system'], e: 'E-mail, base clients et plateforme de partage seront tous indisponibles : il ne s’agit pas seulement des e-mails.' },
+      { cat: 'Détail précis', q: 'What should employees who need weekend access do?', a: 'Contact the help desk before Thursday noon', w: ['Log out on Saturday morning', 'Come to the office on Friday', 'Wait until Sunday evening'], e: 'Phrase clé : « contact the IT help desk before Thursday noon to arrange temporary access ».' },
+      { cat: 'Inférence', q: 'When is the notice most likely to be read?', a: 'Early in the week', w: ['On Sunday morning', 'On Saturday night', 'After the maintenance'], e: 'Le délai « before Thursday noon » suggère que l’avis est lu en début de semaine, bien avant le week-end concerné.' }
+    ]
+  },
+  {
+    id: 'r8', kind: 'Lettre', title: 'Late payment reminder',
+    text: 'Aston & Webb Ltd\n14 Mill Road, Leeds\n\n3 October\n\nMr. Samuel Hart\nHart Interiors\n\nDear Mr. Hart,\n\nOur records show that invoice no. 20418, for 3,250 pounds, was due on 15 September and has not yet been paid. We would be grateful if you could settle this amount within seven days.\n\nIf you have already made the payment, please disregard this letter and accept our thanks. If there is a problem with the invoice, please contact our accounts department at the number below so that we can resolve it quickly.\n\nYours sincerely,\nRachel Webb\nAccounts Manager',
+    qs: [
+      { cat: 'Objet et idée principale', q: 'Why was the letter written?', a: 'To remind a customer about an unpaid invoice', w: ['To thank a customer for a payment', 'To offer a discount on future orders', 'To correct an error in a delivery'], e: 'La facture était due le 15 septembre et n’est « not yet paid » : c’est une relance de paiement.' },
+      { cat: 'Détail précis', q: 'How long does Mr. Hart have to pay?', a: 'Seven days', w: ['Fifteen days', 'Until 15 September', 'Thirty days'], e: '« Settle this amount within seven days ». Le 15 septembre est la date d’échéance déjà dépassée.' },
+      { cat: 'Vocabulaire en contexte', q: 'The word “settle” in paragraph 1 is closest in meaning to', a: 'pay', w: ['reduce', 'organise', 'check'], e: '« Settle an amount / an invoice » = régler une somme. Piège : « settle » signifie aussi « s’installer » dans d’autres contextes.' },
+      { cat: 'Inférence', q: 'What does the letter suggest about Mr. Hart’s payment?', a: 'It may already have been sent.', w: ['It was refused by the bank.', 'It is more than a month late.', 'It was paid in cash.'], e: 'La phrase « If you have already made the payment, please disregard this letter » reconnaît cette possibilité. Le retard est d’environ trois semaines (15 septembre au 3 octobre).' }
+    ]
+  },
+  {
+    id: 'r9', kind: 'Article', title: 'Remote work: what employees really want',
+    text: 'A survey of 2,000 office workers across Europe, published this week by the consultancy Brandt & Lowe, shows that flexibility now matters as much as salary. Fifty-eight percent of respondents said they would consider leaving a job that required them to be in the office five days a week.\n\nHowever, the study also found that employees who work entirely from home are less likely to receive promotions. “Visibility is still an issue,” said researcher Elena Costa. “Managers tend to reward the people they see every day.”\n\nThe report recommends a hybrid model, with two or three days in the office, and urges companies to set clear criteria for evaluating performance, whatever the work location.',
+    qs: [
+      { cat: 'Objet et idée principale', q: 'What is the main topic of the article?', a: 'Employee expectations about where they work', w: ['The salary gap between countries', 'A new office design', 'The cost of commuting'], e: 'L’article rapporte une enquête sur la flexibilité et le télétravail : les attentes des salariés quant à leur lieu de travail.' },
+      { cat: 'Détail précis', q: 'What percentage of respondents might leave a five-day office job?', a: '58 percent', w: ['2,000 percent', 'Two or three percent', '40 percent'], e: '« Fifty-eight percent of respondents said they would consider leaving ». 2 000 est le nombre de personnes interrogées.' },
+      { cat: 'Inférence', q: 'What does Ms. Costa imply about remote workers?', a: 'They may be overlooked by their managers.', w: ['They are less productive.', 'They earn higher salaries.', 'They prefer not to be promoted.'], e: '« Managers tend to reward the people they see every day » : les télétravailleurs, moins visibles, risquent d’être oubliés. L’article ne parle pas de productivité.' },
+      { cat: 'Détail précis', q: 'What does the report recommend?', a: 'A mix of office and home working', w: ['Five days in the office', 'Full-time remote work for everyone', 'Higher salaries for managers'], e: '« The report recommends a hybrid model, with two or three days in the office ».' }
+    ]
+  }
+];

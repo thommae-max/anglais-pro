@@ -15,6 +15,7 @@
     AP.S.toeic.days[AP.today()] = (AP.S.toeic.days[AP.today()] || 0) + 1;
     AP.save();
   }
+  AP.toeicRecord = record;
   const acc = (c) => (c.n ? Math.round(c.ok / c.n * 100) : null);
   const mmss = (s) => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 
@@ -35,9 +36,10 @@
     h += '<button class="tile" data-act="tstart" data-part="p5" data-n="10"><div class="tt"><span>Grammaire et vocabulaire (partie 5)</span><span class="pill">10 questions</span></div><div class="td" style="margin:2px 0 0">Phrases à compléter. Les catégories où vous réussissez le moins reviennent en priorité.</div></button>';
     h += '<button class="tile" data-act="tstart" data-part="p2" data-n="10"><div class="tt"><span>Écoute : question et réponse (partie 2)</span><span class="pill">10 questions</span></div><div class="td" style="margin:2px 0 0">Vous entendez une question et trois réponses, sans les voir. Choisissez A, B ou C.</div></button>';
     h += '<button class="tile" data-act="tstart" data-part="p4" data-n="6"><div class="tt"><span>Écoute : annonces (partie 4)</span><span class="pill">6 questions</span></div><div class="td" style="margin:2px 0 0">Une courte annonce, une question. Comprendre l’essentiel du premier coup.</div></button>';
+    h += '<button class="tile" data-act="lgo" data-n="2"><div class="tt"><span>Lecture : textes professionnels (partie 7)</span><span class="pill">2 textes</span></div><div class="td" style="margin:2px 0 0">E-mails, notes, articles, offres d’emploi. Chronométré, avec explications et repérage des pièges.</div></button>';
     h += '<button class="tile" data-act="tstart" data-part="timed" data-n="15"><div class="tt"><span>Mini-test chronométré</span><span class="pill acc">15 questions</span></div><div class="td" style="margin:2px 0 0">Partie 5 en conditions réelles : visez 25 secondes par question maximum.</div></button>';
     h += '<div class="h2">Ma progression par catégorie</div><div class="list">';
-    P5_CATS.concat(['Question en Wh-', 'Demande et proposition', 'Question oui/non et tags', 'Réponses indirectes', 'Annonces et messages']).forEach((c) => {
+    P5_CATS.concat(['Question en Wh-', 'Demande et proposition', 'Question oui/non et tags', 'Réponses indirectes', 'Annonces et messages', 'Lecture : objet et idée principale', 'Lecture : détail précis', 'Lecture : inférence', 'Lecture : vocabulaire en contexte', 'Lecture : information NON mentionnée']).forEach((c) => {
       const s = stat(c); const a = acc(s);
       const p5 = P5_CATS.indexOf(c) >= 0;
       h += '<div class="set"' + (p5 ? ' ' : ' ') + '><div class="l" style="flex:1"><b style="font-size:15px">' + E(c) + '</b><span>' + (s.n ? s.ok + ' / ' + s.n + ' réussies' : 'Pas encore essayé') + '</span></div>' +
