@@ -75,7 +75,7 @@
     const L = it[field].length;
     const nsp = (x) => AP.norm(x).replace(/ /g, '');
     const homo = (a, b) => (/comme «/.test(a.fr) || /comme «/.test(b.fr)) && (a.fr.toLowerCase().indexOf(b.en.toLowerCase()) >= 0 || b.fr.toLowerCase().indexOf(a.en.toLowerCase()) >= 0);
-    const pool = AP.ITEMS.filter((o) => o.id !== it.id && o.kind === it.kind && AP.norm(o[field]) !== ref && nsp(o[field]) !== nsp(it[field]) && !homo(it, o) && o[field].length < Math.max(90, L * 1.3));
+    const pool = AP.ITEMS.filter((o) => o.id !== it.id && o.kind === it.kind && AP.norm(o[field]) !== ref && AP.norm(o[field === 'en' ? 'fr' : 'en']) !== AP.norm(it[field === 'en' ? 'fr' : 'en']) && nsp(o[field]) !== nsp(it[field]) && !homo(it, o) && o[field].length < Math.max(90, L * 1.3));
     const scored = pool.map((o) => ({
       o: o,
       s: (o.cat === it.cat ? 0 : o.theme === it.theme ? 12 : 30) + Math.abs(o[field].length - L) * 0.5 - sim(it[field], o[field]) * 30 + Math.random() * 14
@@ -105,9 +105,10 @@
   function gapInfo(sent) {
     const toks = wordsOf(sent);
     const cands = [];
+    const low = toks.map((t) => t.replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, '').toLowerCase());
     toks.forEach((t, i) => {
       const w = t.replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, '');
-      if (w.length >= 4 && STOP.indexOf(w.toLowerCase()) < 0 && !/\d/.test(w)) cands.push({ i: i, w: w });
+      if (w.length >= 4 && STOP.indexOf(w.toLowerCase()) < 0 && !/\d/.test(w) && low.filter((x) => x === w.toLowerCase()).length === 1) cands.push({ i: i, w: w });
     });
     if (!cands.length) return null;
     cands.sort((a, b) => b.w.length - a.w.length + (Math.random() - 0.5) * 3);
@@ -117,8 +118,9 @@
     const out = toks.slice(); out[c.i] = lead + '\u0000' + trail;
     return { text: out.join(' '), target: c.w };
   }
-  function wordDistractors(target, n) {
-    const v = buildVocab(); const tl = target.toLowerCase();
+  function wordDistractors(target, n, sent) {
+    const tl = target.toLowerCase(); const inS = (sent || '').toLowerCase();
+    const v = buildVocab().filter((w) => lev(w, tl) > 2 && w.indexOf(tl) < 0 && tl.indexOf(w) < 0 && !new RegExp('\\b' + w + '\\b').test(inS));
     const suf = (w) => (/ing$/.test(w) ? 'ing' : /ed$/.test(w) ? 'ed' : /s$/.test(w) ? 's' : /ly$/.test(w) ? 'ly' : '');
     const sc = v.filter((w) => w !== tl).map((w) => ({ w: w, s: Math.abs(w.length - tl.length) * 2 + (suf(w) === suf(tl) ? 0 : 5) + (w[0] === tl[0] ? -2 : 0) + Math.random() * 6 })).sort((a, b) => a.s - b.s);
     return sc.slice(0, n).map((x) => (target[0] === target[0].toUpperCase() ? x.w[0].toUpperCase() + x.w.slice(1) : x.w));
@@ -168,7 +170,7 @@
     let pool = types;
     if (want && want !== 'mix' && GROUPS[want]) {
       const g = types.filter((k) => GROUPS[want].indexOf(k) >= 0);
-      if (g.length) pool = g;
+      if (g.length) pool = g; else if (want === 'mcp') pool = ['mcp-fr'];
     }
     const bag = []; const w = BAGS[level] || BAGS.hard;
     pool.forEach((k) => { const n = want && want !== 'mix' ? 1 : (w[k] == null ? 1 : w[k]); for (let i = 0; i < n; i++) bag.push(k); });
@@ -212,7 +214,7 @@
       q.prompt = it.kind === 'phrase' ? it.fr : it.exfr; q.promptLang = 'fr';
       if (level === 'expert') { q.input = true; q.answerText = g.target; }
       else {
-        const o = AP.shuffle([g.target].concat(wordDistractors(g.target, nOpts))).map((x) => ({ id: 'w:' + x, text: x }));
+        const o = AP.shuffle([g.target].concat(wordDistractors(g.target, nOpts, sent))).map((x) => ({ id: 'w:' + x, text: x }));
         q.optLang = 'en'; q.opts = o; q.correct = 'w:' + g.target;
       }
     }

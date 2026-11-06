@@ -345,7 +345,7 @@
   }
   const GR = { mcp: ['mcp-en', 'mcp-fr'], context: ['cloze', 'gap'], listen: ['listen'], dictee: ['dictee'], type: ['type'], order: ['order'] };
   function eligible(items, mode) {
-    if (mode === 'mix' || mode === 'mcp') return items;
+    if (mode === 'mix') return items;
     const lvl = AP.S.settings.level;
     return items.filter((i) => AP.Q.types(i, lvl).some((t) => GR[mode].indexOf(t) >= 0));
   }
