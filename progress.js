@@ -99,11 +99,18 @@
       '<div style="margin-top:10px"><button class="btn alt" data-act="hardquiz">Les retravailler en quiz</button></div>';
   }
 
+  function workBtn(k) {
+    const T = window.TOEIC || {};
+    if ((T.p5 || []).some((q) => q.cat === k)) return '<button class="btn sm alt" data-act="tstart" data-part="p5" data-n="8" data-cat="' + E(k) + '">Travailler</button>';
+    if (/^Lecture/.test(k)) return '<button class="btn sm alt" data-act="lgo" data-n="2">Travailler</button>';
+    if (k === 'Annonces et messages') return '<button class="btn sm alt" data-act="tstart" data-part="p4" data-n="6">Travailler</button>';
+    return '<button class="btn sm alt" data-act="tstart" data-part="p2" data-n="10">Travailler</button>';
+  }
   function weakToeic() {
     const cats = AP.S.toeic.cats;
     const w = Object.keys(cats).filter((k) => cats[k].n >= 3 && cats[k].ok / cats[k].n < 0.75).sort((a, b) => cats[a].ok / cats[a].n - cats[b].ok / cats[b].n).slice(0, 2);
     if (!w.length) return '';
-    return '<div class="h2" style="margin-top:16px">Règles TOEIC à retravailler</div><div class="list">' + w.map((k) => '<div class="set"><div class="l" style="flex:1"><b style="font-size:15px">' + E(k) + '</b><span>' + pct(cats[k].ok, cats[k].n) + ' % de réussite</span></div><button class="btn sm alt" data-act="tstart" data-part="p5" data-n="8" data-cat="' + E(k) + '">Travailler</button></div>').join('') + '</div>';
+    return '<div class="h2" style="margin-top:16px">Règles TOEIC à retravailler</div><div class="list">' + w.map((k) => '<div class="set"><div class="l" style="flex:1"><b style="font-size:15px">' + E(k) + '</b><span>' + pct(cats[k].ok, cats[k].n) + ' % de réussite</span></div><button class="btn sm alt" ' + workBtn(k) + '</div>').join('') + '</div>';
   }
 
   function goalsBlock() {

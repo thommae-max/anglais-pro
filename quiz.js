@@ -25,27 +25,41 @@
       const nop = b.replace(/\([^)]*\)/g, ' ');
       set.add(AP.norm(b)); set.add(AP.norm(nop)); set.add(AP.norm(nop.replace(/\.\.\./g, ' ')));
     });
+    const am = en.match(/^([A-Z0-9&\/ ]{2,10})\s*\(([A-Za-z ,'-]{3,60})\)\s*$/);
+    if (am) set.add(AP.norm(am[2]));
     Array.from(set).forEach((v) => { if (v.indexOf('to ') === 0) set.add(v.slice(3)); });
     return Array.from(set).filter(Boolean);
   }
   Q.variants = variants;
 
-  function tolFor(len) { return len <= 4 ? 0 : len <= 8 ? 1 : len <= 20 ? 2 : Math.max(3, Math.round(len * 0.1)); }
+  function tolFor(len) { return len <= 5 ? 0 : len <= 8 ? 1 : len <= 10 ? 1 : len <= 20 ? 2 : Math.max(3, Math.round(len * 0.1)); }
+  /* Variantes de toutes les cartes : une saisie qui est exactement une AUTRE carte n'est pas une faute de frappe */
+  let owners = null;
+  function ownerIndex() {
+    if (owners) return owners;
+    owners = {};
+    AP.ITEMS.forEach((it) => { variants(it.en).forEach((v) => { (owners[v] = owners[v] || {})[AP.norm(it.en)] = 1; }); });
+    return owners;
+  }
 
   /* Compare une saisie à une réponse anglaise : 'ok' | 'typo' | 'ko' */
   Q.checkAgainst = function (input, en) {
     const x = AP.norm(input);
     if (!x) return 'ko';
     let best = 99;
-    variants(en).forEach((v) => {
+    const mine = AP.norm(en);
+    const vs = variants(en);
+    const own = ownerIndex()[x];
+    const isOther = own && !own[mine] && vs.indexOf(x) < 0;
+    vs.forEach((v) => {
       const d = lev(x, v);
-      if (d === 0) best = 0; else if (d <= tolFor(v.length) && best > 0) best = Math.min(best, d);
+      if (d === 0) best = 0; else if (d <= tolFor(v.length) && best > 0 && !isOther && x.charAt(0) === v.charAt(0)) best = Math.min(best, d);
     });
     return best === 0 ? 'ok' : best < 99 ? 'typo' : 'ko';
   };
   Q.checkTyped = (input, it) => Q.checkAgainst(input, it.en);
 
-  function wordsOf(s) { return s.replace(/\s+/g, ' ').trim().split(' ').filter(Boolean); }
+  function wordsOf(s) { return s.replace(/\s+/g, ' ').trim().split(' ').filter((w) => /[A-Za-z0-9\u00C0-\u017F]/.test(w)); }
 
   /* ---------- Distracteurs crédibles ---------- */
   function sim(a, b) {
@@ -59,7 +73,9 @@
   function distractors(it, field, n) {
     const ref = AP.norm(it[field]);
     const L = it[field].length;
-    const pool = AP.ITEMS.filter((o) => o.id !== it.id && o.kind === it.kind && AP.norm(o[field]) !== ref && o[field].length < 90);
+    const nsp = (x) => AP.norm(x).replace(/ /g, '');
+    const homo = (a, b) => (/comme «/.test(a.fr) || /comme «/.test(b.fr)) && (a.fr.toLowerCase().indexOf(b.en.toLowerCase()) >= 0 || b.fr.toLowerCase().indexOf(a.en.toLowerCase()) >= 0);
+    const pool = AP.ITEMS.filter((o) => o.id !== it.id && o.kind === it.kind && AP.norm(o[field]) !== ref && nsp(o[field]) !== nsp(it[field]) && !homo(it, o) && o[field].length < Math.max(90, L * 1.3));
     const scored = pool.map((o) => ({
       o: o,
       s: (o.cat === it.cat ? 0 : o.theme === it.theme ? 12 : 30) + Math.abs(o[field].length - L) * 0.5 - sim(it[field], o[field]) * 30 + Math.random() * 14
@@ -121,10 +137,12 @@
   /* ---------- Types possibles ---------- */
   Q.types = function (it, level) {
     level = level || 'hard';
-    const t = ['mcp-en', 'mcp-fr'];
+    const cognate = AP.norm(it.en) === AP.norm(it.fr);
+    const homophone = /comme «/.test(it.fr);
+    const t = cognate ? [] : ['mcp-en', 'mcp-fr'];
     const speak = AP.hasSpeech;
-    if (speak && it.en.length <= 70) { t.push('listen'); t.push('dictee'); }
-    if (it.en.length <= (level === 'normal' ? 38 : 64) && it.en.indexOf('...') < 0) t.push('type');
+    if (speak && it.en.length <= 70 && !homophone) { t.push('listen'); if (!/[0-9%$€£&@#+=]/.test(it.en)) t.push('dictee'); }
+    if (!cognate && it.en.length <= (level === 'normal' ? 38 : 64) && it.en.indexOf('...') < 0) t.push('type');
     const sent = gapSentence(it);
     if (sent) {
       const w = wordsOf(sent).length;
@@ -132,13 +150,14 @@
       if (w >= 4 && gapInfo(sent)) t.push('gap');
     }
     if (clozeInfo(it)) t.push('cloze');
+    if (!t.length) t.push('mcp-fr');
     return t;
   };
 
   const BAGS = {
     normal: { 'mcp-en': 5, 'mcp-fr': 5, listen: 2, type: 3, order: 3, cloze: 4, gap: 2, dictee: 1 },
     hard: { 'mcp-en': 1, 'mcp-fr': 2, listen: 2, type: 5, order: 3, cloze: 3, gap: 3, dictee: 3 },
-    expert: { 'mcp-en': 0, 'mcp-fr': 1, listen: 0, type: 7, order: 3, cloze: 3, gap: 4, dictee: 4 }
+    expert: { 'mcp-en': 0, 'mcp-fr': 0, listen: 0, type: 7, order: 3, cloze: 3, gap: 4, dictee: 4 }
   };
   const GROUPS = { mcp: ['mcp-en', 'mcp-fr'], context: ['cloze', 'gap'], listen: ['listen'], dictee: ['dictee'], type: ['type'], order: ['order'] };
 

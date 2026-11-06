@@ -1,6 +1,6 @@
 :root {
-  --bg: #f6f3ec; --card: #ffffff; --ink: #1f2a44; --muted: #6b7388; --line: #e4dfd2;
-  --accent: #e4572e; --accent-ink: #ffffff; --brand: #1f2a44; --brand-ink: #ffffff;
+  --bg: #f6f3ec; --card: #ffffff; --ink: #1f2a44; --muted: #5f6679; --line: #e4dfd2;
+  --accent: #c2410c; --accent-ink: #ffffff; --brand: #1f2a44; --brand-ink: #ffffff;
   --ok: #2e8b57; --ok-bg: #e3f3e9; --ko: #c0392b; --ko-bg: #fbe6e3; --mid: #b7791f; --mid-bg: #fbf0d9;
   --soft: #efeadf; --shadow: 0 1px 2px rgba(31,42,68,.06), 0 6px 18px rgba(31,42,68,.06);
   --serif: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
@@ -10,7 +10,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #14181f; --card: #1c222c; --ink: #eef0f5; --muted: #98a1b5; --line: #2b3342;
-    --accent: #ff7a50; --brand: #e9ecf5; --brand-ink: #14181f;
+    --accent: #ff7a50; --accent-ink: #1a0f0a; --brand: #e9ecf5; --brand-ink: #14181f;
     --ok: #5cc88a; --ok-bg: #173325; --ko: #ff8a7c; --ko-bg: #3a1e1b; --mid: #e6b657; --mid-bg: #382c12;
     --soft: #232a36; --shadow: 0 1px 2px rgba(0,0,0,.4);
   }
@@ -111,7 +111,7 @@ h1, h2, h3, p { margin: 0; }
 .spk.pulse { background: var(--accent); color: #fff; }
 .center { display: flex; justify-content: center; margin-top: 12px; }
 .reveal { margin-top: 18px; color: var(--muted); font-size: 14px; }
-.dock { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; }
+.dock { display: flex; flex-direction: column; gap: 10px; padding: 10px 0 4px; position: sticky; bottom: 0; background: var(--bg); z-index: 5; box-shadow: 0 -10px 10px -6px var(--bg); }
 .grades { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .grade { border-radius: 14px; padding: 10px 4px 9px; font-weight: 700; font-size: 15px; display: flex; flex-direction: column; align-items: center; gap: 1px; min-height: 58px; justify-content: center; }
 .grade small { font-weight: 500; font-size: 11px; opacity: .85; }

@@ -70,8 +70,10 @@
   const extra = {};
   function nav(h) { if (location.hash === h) route(); else location.hash = h; }
 
+  let navCount = 0;
   function route() {
     AP.stopSpeech();
+    navCount += 1;
     const h = (location.hash || '#/').replace(/^#\/?/, '');
     const parts = h.split('/');
     const r = parts[0] || '';
@@ -314,7 +316,8 @@
     if (q.answered) return;
     q.answered = true; q.result = result;
     const good = result === 'ok' || result === 'typo';
-    if (!ctx.practice) AP.grade(q.id, good ? 'ok' : 'ko');
+    const fresh = AP.unseen(AP.BY[q.id]);
+    if (!ctx.practice && !fresh) AP.grade(q.id, good ? 'ok' : 'ko');
     if (good) ctx.ok += 1; else { ctx.ko += 1; if (ctx.missed.indexOf(q.id) < 0) ctx.missed.push(q.id); }
     rerender();
     if (!good && AP.S.settings.autoplay) AP.speak(AP.BY[q.id].en);
@@ -357,7 +360,7 @@
     let h = '<div class="h1">S’entraîner</div><p class="sub">Quiz : testez ce qui est vraiment acquis. Les erreurs reviennent dans vos révisions.</p>';
     h += trainSeg('quiz');
     h += '<div class="h2">Niveau de difficulté</div><div class="chips wrap">' + LEVELS.map((s) => '<button class="chip' + (AP.S.settings.level === s[0] ? ' on' : '') + '" data-act="qlevel" data-v="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>';
-    h += '<p class="help" style="margin-top:0">' + ({ normal: 'Choix multiples surtout.', hard: 'Plus de saisie, de dictées et de phrases à compléter, avec des pièges proches.', expert: 'Aucun choix multiple : vous écrivez toutes vos réponses.' }[AP.S.settings.level]) + '</p>';
+    h += '<p class="help" style="margin-top:0">' + ({ normal: 'Choix multiples surtout.', hard: 'Plus de saisie, de dictées et de phrases à compléter, avec des pièges proches.', expert: 'Presque aucun choix multiple (sauf si vous le demandez) : vous écrivez toutes vos réponses.' }[AP.S.settings.level]) + '</p>';
     h += '<div class="h2">Sur quoi ?</div><div class="chips wrap">' + SCOPES.map((s) => '<button class="chip' + (qSetup.scope === s[0] ? ' on' : '') + '" data-act="qs" data-k="scope" data-v="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>';
     h += '<div class="chips wrap">' + AP.THEMES.map((t) => '<button class="chip' + (qSetup.scope === 'th:' + t.id ? ' on' : '') + '" data-act="qs" data-k="scope" data-v="th:' + t.id + '">' + E(t.name) + '</button>').join('') + '</div>';
     h += '<div class="h2">Type de questions</div><div class="chips wrap">' + MODES.map((s) => '<button class="chip' + (qSetup.mode === s[0] ? ' on' : '') + '" data-act="qs" data-k="mode" data-v="' + s[0] + '">' + s[1] + '</button>').join('') + '</div>';
@@ -374,6 +377,10 @@
 
   function startQuiz(scope, mode, n, practice) {
     let items = eligible(poolFor(scope), mode);
+    if (items.length < 4) {
+      const have = {}; items.forEach((i) => { have[i.id] = 1; });
+      ['seen', 'all'].forEach((sc) => { eligible(poolFor(sc), mode).forEach((i) => { if (items.length < 8 && !have[i.id]) { have[i.id] = 1; items.push(i); } }); });
+    }
     if (items.length < 4) { toast('Pas assez de cartes pour ce quiz'); return false; }
     items = items.map((i) => ({ i: i, s: (AP.S.cards[i.id] ? AP.S.cards[i.id].b : 2.5) + Math.random() * 2.5 - (AP.isHard(i.id) ? 1.5 : 0) })).sort((a, b) => a.s - b.s).map((x) => x.i);
     const ids = AP.shuffle(items.slice(0, n).map((i) => i.id));
@@ -518,12 +525,12 @@
   function viewFiche(id) {
     const f = AP.FICHES.find((x) => x.id === id);
     if (!f) { nav('#/cours'); return; }
-    let h = '<button class="back" data-act="go" data-to="cours">' + I.back + 'Cours</button>';
+    let h = '<button class="back" data-act="histback">' + I.back + 'Retour</button>';
     h += '<div class="h1" style="font-size:25px">' + E(f.title) + '</div><p class="sub">' + E(f.intro || '') + '</p>';
     (f.blocks || []).forEach((b) => {
       h += '<div class="fiche-block"><h3>' + E(b.h || '') + '</h3>' + (b.sub ? '<div class="sub" style="font-size:14px">' + E(b.sub) + '</div>' : '') + (b.tip ? '<div class="tip">' + E(b.tip) + '</div>' : '');
       if (b.rows && b.rows.length) {
-        h += '<div class="list">' + b.rows.map((r) => '<div class="row"><div class="rt"><b>' + E(r[0]) + '</b><span>' + E(r[1] || '') + '</span></div>' + spk(r[0], 'sm') + '</div>').join('') + '</div>';
+        h += '<div class="list">' + b.rows.map((r) => '<div class="row"><div class="rt"><b>' + E(r[0]) + '</b><span>' + E(r[1] || '') + '</span></div>' + (/[àâçéèêëîïôûùü]|^Pas de /i.test(r[0]) ? '' : spk(r[0], 'sm')) + '</div>').join('') + '</div>';
       }
       h += '</div>';
     });
@@ -645,7 +652,7 @@
       const id = r.getAttribute('data-rid');
       if (id && AP.BY[id]) nav('#/carte/' + id); else r.classList.toggle('open');
     },
-    histback() { if (history.length > 1) history.back(); else nav('#/ref'); },
+    histback() { if (navCount > 1) history.back(); else nav('#/ref'); },
     refq(el) { refState.q = el.dataset.v; refState.lim = 60; viewRef(); },
     hidebanner() { AP.S.settings.bannerHidden = true; AP.save(); viewHome(); },
     start(el) { startSession(el.dataset.th || null, null, !!el.dataset.strict); },
@@ -733,7 +740,8 @@
     },
     importtoggle() { const b = document.getElementById('imp'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; },
     import() {
-      try { AP.importCode(document.getElementById('impcode').value); toast('Progression restaurée'); viewSettings(); }
+      if (!window.confirm('Remplacer toute votre progression actuelle par ce code de sauvegarde ?')) return;
+    try { AP.importCode(document.getElementById('impcode').value); toast('Progression restaurée'); viewSettings(); }
       catch (e) { toast('Code invalide'); }
     },
     cleanhard() { Object.keys(AP.S.cards).forEach((id) => { AP.S.cards[id].ko = 0; }); AP.save(); toast('Fait'); },

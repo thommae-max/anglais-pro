@@ -139,7 +139,7 @@
   function viewResult() {
     const r = st.run; const n = r.items.length;
     const pct = r.score / n;
-    let h = '<div class="sbar"><span></span></div><div class="stage"><div class="flash"><span class="lab ok">Séance terminée</span><div class="score">' + (Math.round(r.score * 2) / 2) + '<small>/' + n + '</small></div><div class="fr muted" style="margin-top:6px">' + r.ok + ' justes · ' + r.mid + ' presque · ' + r.ko + ' à revoir</div><div class="fr" style="font-size:17px;margin-top:10px">' + (pct >= .85 ? 'Très solide.' : pct >= .65 ? 'Bonne base, à consolider.' : 'À retravailler : ces cartes reviendront dans vos révisions.') + '</div>';
+    let h = '<div class="sbar"><span></span></div><div class="stage"><div class="flash"><span class="lab ok">Séance terminée</span><div class="score">' + (Math.round(r.score * 2) / 2) + '<small>/' + n + '</small></div><div class="fr muted" style="margin-top:6px">' + r.ok + ' justes · ' + r.mid + ' presque · ' + r.ko + ' à revoir</div><div class="fr" style="font-size:17px;margin-top:10px">' + (pct >= .85 ? 'Très solide.' : pct >= .65 ? 'Bonne base, à consolider.' : 'À retravailler : refaites ces questions dans une prochaine série.') + '</div>';
     if (r.missed.length) h += '<div class="missed"><div class="h2" style="margin:8px 0">À retenir</div>' + r.missed.map((id) => U.rowHTML(AP.BY[id], { plain: true })).join('') + '</div>';
     h += '</div></div><div class="dock">' + (r.missed.length ? '<button class="btn accent" data-act="predo">Refaire les ratés</button>' : '') + '<button class="btn alt" data-act="pshareres">Partager le résultat</button><button class="btn alt" data-act="pend">Terminer</button></div>';
     U.mount(h, true);

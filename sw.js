@@ -1,9 +1,9 @@
 /* Anglais pro : service worker (hors ligne + notifications) */
-const CACHE = 'anglais-pro-v12';
-const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'core.js', 'quiz.js', 'config.js', 'content.js', 'toeic-data.js', 'partner.js', 'apprendre.js', 'oral.js', 'progress.js', 'toeic-ui.js', 'toeic7-data.js', 'toeic7.js', 'main.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
+const CACHE = 'anglais-pro-v13';
+const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'core.js', 'quiz.js', 'config.js', 'content.js', 'toeic-data.js', 'partner.js', 'apprendre.js', 'oral.js', 'progress.js', 'toeic-ui.js', 'toeic7-data.js', 'toeic7.js', 'main.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => Promise.all(SHELL.map((u) => c.add(new Request(u, { cache: 'reload' }))))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));

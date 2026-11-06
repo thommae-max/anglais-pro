@@ -63,7 +63,7 @@
       '<div class="center" style="gap:12px;margin-top:14px"><button class="btn sm alt" data-act="say" data-say="' + E(it.en) + '">' + I.spk.replace('<svg', '<svg style="width:18px;height:18px"') + 'Écouter</button><button class="btn sm alt" data-act="sayslow" data-say="' + E(it.en) + '">' + I.slow.replace('<svg', '<svg style="width:18px;height:18px"') + 'Lent</button>' + U.star(it.id) + '</div></div>';
     if (it.ex) h += '<div class="h2">Exemple</div><div class="card"><div class="en" style="font-size:18px">' + E(it.ex) + '</div><div class="td" style="margin:6px 0 0">' + E(it.exfr || '') + '</div></div>';
     h += '<div class="h2">Où il se trouve</div><div class="card"><div class="td" style="margin:0"><b style="display:inline">' + E(it.cat) + '</b>' + (th ? ' · ' + E(th.name) : '') + '</div></div>';
-    h += '<div class="h2">Mon apprentissage</div><div class="card"><div class="td" style="margin:0">' + AP.STATUS_LABEL[st] + (inRev ? ' · prochaine révision : ' + (c.due > '2900' ? 'à planifier' : c.due) : ' · pas encore dans vos révisions') + '</div>' +
+    h += '<div class="h2">Mon apprentissage</div><div class="card"><div class="td" style="margin:0">' + AP.STATUS_LABEL[st] + (inRev ? ' · prochaine révision : ' + (c.due > '2900' ? 'à planifier' : c.due.split('-').reverse().join('/')) : ' · pas encore dans vos révisions') + '</div>' +
       (inRev ? '' : '<button class="btn sm" style="margin-top:10px" data-act="addrev" data-id="' + it.id + '">Ajouter à mes révisions</button>') + '</div>';
     if (th) h += '<div style="margin-top:14px">' + tile('go', 'data-to="theme/' + th.id + '"', 'Voir tout le thème « ' + E(th.name) + ' »') + '</div>';
     U.mount(h);

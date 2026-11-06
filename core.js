@@ -41,7 +41,8 @@
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const o = JSON.parse(raw);
-        d.cards = o.cards || {};
+        d.cards = {};
+        Object.keys(o.cards || {}).forEach((k) => { const c = o.cards[k]; if (c && typeof c === 'object' && typeof c.b === 'number') d.cards[k] = c; });
         Object.assign(d.settings, o.settings || {});
         d.settings.goals = Object.assign({ days: 5, words: 500, wordsDate: '', toeic: 850, toeicNow: 750, toeicDate: '' }, (o.settings && o.settings.goals) || {});
         d.stats.days = (o.stats && o.stats.days) || {};
@@ -310,7 +311,10 @@
   AP.exportCode = () => btoa(unescape(encodeURIComponent(JSON.stringify({ cards: AP.S.cards, settings: AP.S.settings, stats: AP.S.stats, toeic: AP.S.toeic }))));
   AP.importCode = function (code) {
     const o = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
-    if (!o || typeof o.cards !== 'object') throw new Error('format');
+    if (!o || typeof o.cards !== 'object' || o.cards === null || Array.isArray(o.cards)) throw new Error('format');
+    const bad = Object.keys(o.cards).filter((k) => !o.cards[k] || typeof o.cards[k] !== 'object' || typeof o.cards[k].b !== 'number');
+    if (bad.length) throw new Error('format');
+    if (o.settings) delete o.settings.pushSub;
     AP.replaceState(o);
   };
 })();

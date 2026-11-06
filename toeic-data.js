@@ -59,7 +59,7 @@
 
     ['Comparaison et quantité', 'This year’s profits are ___ than last year’s.', 'higher', 'high', 'highest', 'more high', 'Comparatif de supériorité suivi de « than » : higher.'],
     ['Comparaison et quantité', 'It is the ___ expensive model in our catalog.', 'most', 'more', 'much', 'very', 'Superlatif après « the » : the most expensive.'],
-    ['Comparaison et quantité', 'The new system is ___ as efficient as the old one.', 'twice as', 'twice more', 'as twice', 'more twice', 'Multiplicateur + as ... as : twice as efficient as.'],
+    ['Comparaison et quantité', 'The new system is ___ as efficient as the old one.', 'twice', 'twice more', 'as twice', 'more twice', 'Multiplicateur + as ... as : twice as efficient as.'],
     ['Comparaison et quantité', 'We received ___ applications than we expected.', 'more', 'most', 'many', 'much', '« Than » appelle un comparatif : more.'],
     ['Comparaison et quantité', 'The ___ the delivery, the higher the fee.', 'faster', 'fast', 'fastest', 'more fast', 'Structure the + comparatif, the + comparatif.'],
     ['Comparaison et quantité', 'Only ___ of the staff attended the training.', 'a few', 'a little', 'much', 'every', '« A few of » + nom pluriel : quelques-uns.'],
