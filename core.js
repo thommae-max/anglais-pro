@@ -126,7 +126,8 @@
   };
   AP.unseen = (it) => !AP.S.cards[it.id] || AP.S.cards[it.id].n === 0;
   AP.newIds = function (theme, n) {
-    const pick = (th) => AP.ITEMS.filter((i) => i.theme === th && AP.unseen(i));
+    const prio = (i) => (/^m7/.test(i.fiche || '') ? 0 : 1);
+    const pick = (th) => AP.ITEMS.filter((i) => i.theme === th && AP.unseen(i)).sort((x, y) => prio(x) - prio(y));
     let pool = theme ? pick(theme) : [];
     if (pool.length < n) {
       AP.THEMES.forEach((t) => { if (t.id !== theme && pool.length < n * 3) pool = pool.concat(pick(t.id)); });
@@ -198,32 +199,76 @@
     return c[0] || null;
   }
   AP.speakText = (en) => String(en).replace(/___/g, 'blank').replace(/\s\/\s/g, ', ').replace(/\s+—\s+/g, '. ').replace(/\s+/g, ' ').trim();
+  AP.onAudioIssue = null;     // rappel appelé par l'interface si aucun son ne démarre
+  let unlocked = false, lastIssue = 0;
   function utter(text, rate, onend) {
     const u = new SpeechSynthesisUtterance(AP.speakText(text));
     u.lang = AP.S.settings.accent;
     const v = pickVoice();
     if (v) u.voice = v;
     u.rate = rate || AP.S.settings.rate;
-    u.onend = function () { if (onend) onend(); };
-    u.onerror = function () { if (onend) onend(); };
+    let done = false;
+    const finish = function () { if (done) return; done = true; u._finished = true; clearTimeout(u._wd); if (onend) onend(); };
+    u._started = false;
+    u.onstart = function () { u._started = true; };
+    u.onend = finish;
+    u.onerror = finish;
+    u._finish = finish;
     keep = u;
     return u;
   }
-  function fire(u) {
+  function fire(u, maxMs) {
     const ss = window.speechSynthesis;
     try { ss.resume(); } catch (e) { /* ignore */ }
     ss.speak(u);
+    u._seq = seqId;
+    /* iOS ne déclenche pas toujours onend : filet de sécurité pour ne pas bloquer une suite */
+    u._wd = setTimeout(function () { if (u._finish) u._finish(); }, maxMs || 25000);
+    /* Aucun son démarré après 2 s : on prévient l'interface (volume, mode silencieux, voix) */
+    setTimeout(function () {
+      let speaking = false;
+      try { speaking = window.speechSynthesis.speaking; } catch (e) { /* ignore */ }
+      if (!u._started && !u._finished && u._seq === seqId && !speaking && Date.now() - lastIssue > 30000 && AP.onAudioIssue) { lastIssue = Date.now(); AP.onAudioIssue(); }
+    }, 2000);
   }
+  /* Découpe un texte long en phrases : iOS coupe les énoncés trop longs */
+  function chunks(text) {
+    const t = AP.speakText(text);
+    if (t.length <= 150) return [t];
+    const parts = t.match(/[^.!?;]+[.!?;]*\s*/g) || [t];
+    const out = []; let cur = '';
+    parts.forEach(function (p) { if ((cur + p).length > 150 && cur) { out.push(cur.trim()); cur = p; } else cur += p; });
+    if (cur.trim()) out.push(cur.trim());
+    return out;
+  }
+  /* Premier toucher : déverrouille l'audio sur iOS (les lectures automatiques sont sinon ignorées) */
+  AP.unlockAudio = function () {
+    if (unlocked || !AP.hasSpeech) return;
+    unlocked = true;
+    try {
+      const u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0; u.lang = 'en-GB';
+      window.speechSynthesis.speak(u);
+    } catch (e) { /* ignore */ }
+  };
+  ['touchend', 'click'].forEach(function (ev) { document.addEventListener(ev, function () { AP.unlockAudio(); }, { capture: true, passive: true }); });
   /* Lit un texte. Retourne false si l'audio n'existe pas sur l'appareil. */
   AP.speak = function (text, rate) {
     if (!AP.hasSpeech) return false;
-    seqId++;
+    const my = ++seqId;
     try {
       const ss = window.speechSynthesis;
       const busy = ss.speaking || ss.pending;
       if (busy) ss.cancel();
-      const u = utter(text, rate);
-      if (busy) setTimeout(() => fire(u), 140); else fire(u);
+      const list = chunks(text);
+      let i = 0;
+      const next = function () {
+        if (my !== seqId || i >= list.length) return;
+        const piece = list[i++];
+        const u = utter(piece, rate, function () { if (i < list.length) setTimeout(next, 60); });
+        fire(u, 4000 + piece.length * 120);
+      };
+      if (busy) setTimeout(next, 140); else next();
       return true;
     } catch (e) { return false; }
   };
@@ -235,13 +280,15 @@
       const ss = window.speechSynthesis;
       const busy = ss.speaking || ss.pending;
       if (busy) ss.cancel();
+      const flat = [];
+      list.forEach(function (item) { chunks(item).forEach(function (c, k, arr) { flat.push({ t: c, last: k === arr.length - 1 }); }); });
       let i = 0;
-      const next = () => {
+      const next = function () {
         if (my !== seqId) return;
-        if (i >= list.length) { if (done) done(); return; }
-        const item = list[i++];
-        const u = utter(item, 0.95, () => setTimeout(next, gap || 700));
-        fire(u);
+        if (i >= flat.length) { if (done) done(); return; }
+        const it = flat[i++];
+        const u = utter(it.t, 0.95, function () { setTimeout(next, it.last ? (gap || 700) : 60); });
+        fire(u, 4000 + it.t.length * 120);
       };
       if (busy) setTimeout(next, 140); else next();
       return true;
@@ -253,7 +300,7 @@
     if (!AP.hasSpeech) return false;
     seqId++;
     try { window.speechSynthesis.cancel(); } catch (e) { /* ignore */ }
-    keep = null; voices = [];
+    keep = null; voices = []; unlocked = false;
     loadVoices();
     setTimeout(() => { loadVoices(); AP.speak('Audio check. Can you hear me clearly?'); }, 300);
     return true;

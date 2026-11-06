@@ -3,7 +3,7 @@
   'use strict';
   const AP = window.AP, U = AP.UI, E = U.E, I = U.I, A = U.A;
 
-  const SCOPES = [['metier', 'Mon métier'], ['entreprise', 'Entreprise au quotidien'], ['quotidien', 'Quotidien et oral'], ['expressions', 'Expressions'], ['seen', 'Ce que j’ai vu']];
+  const SCOPES = [['metier', 'Mon métier'], ['entreprise', 'Entreprise au quotidien'], ['quotidien', 'Quotidien et oral'], ['prono', 'Prononciation (cours 8)'], ['expressions', 'Expressions'], ['seen', 'Ce que j’ai vu']];
   const MODES = [['see', 'Je lis l’anglais à voix haute'], ['say', 'Je dis la phrase depuis le français']];
   const st = { scope: 'metier', mode: 'see', n: 8, run: null };
   const rc = { stream: null, rec: null, chunks: [], recording: false, t0: 0, timer: null, audio: null };
@@ -13,6 +13,7 @@
     let items = AP.ITEMS.filter((i) => i.en.length <= 90);
     if (st.scope === 'seen') items = items.filter((i) => !AP.unseen(i));
     else if (st.scope === 'expressions') items = items.filter((i) => i.kind === 'expression');
+    else if (st.scope === 'prono') items = AP.ITEMS.filter((i) => i.theme === 'prono' && i.en.length <= 90);
     else items = items.filter((i) => i.theme === st.scope && i.kind !== 'word' && i.en.split(' ').length >= 3);
     return items;
   }

@@ -785,5 +785,6 @@
     route: route,
     rerenderNoAnim: function () { noAnim = true; }
   };
+  AP.onAudioIssue = () => toast('Pas de son ? Vérifiez le volume et le mode silencieux, puis Réglages > Réparer.');
   AP._dbg = () => ({ ses: ses, qz: qz });
 })();
