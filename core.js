@@ -202,18 +202,21 @@
   AP.speakText = (en) => String(en).replace(/___/g, 'blank').replace(/\s\/\s/g, ', ').replace(/\s+—\s+/g, '. ').replace(/\s+/g, ' ').trim();
   AP.onAudioIssue = null;     // rappel appelé par l'interface si aucun son ne démarre
   let unlocked = false, lastIssue = 0;
+  let noVoice = false;
+  AP.audioInfo = { voice: '', err: '', n: 0 };
   function utter(text, rate, onend) {
     const u = new SpeechSynthesisUtterance(AP.speakText(text));
     u.lang = AP.S.settings.accent;
-    const v = pickVoice();
+    const v = noVoice ? null : pickVoice();
     if (v) u.voice = v;
+    AP.audioInfo.voice = v ? v.name + ' (' + v.lang + ')' : 'par défaut';
     u.rate = rate || AP.S.settings.rate;
     let done = false;
     const finish = function () { if (done) return; done = true; u._finished = true; clearTimeout(u._wd); if (onend) onend(); };
     u._started = false;
-    u.onstart = function () { u._started = true; };
+    u.onstart = function () { u._started = true; AP.audioInfo.err = ''; };
     u.onend = finish;
-    u.onerror = finish;
+    u.onerror = function (ev) { if (ev && ev.error && ev.error !== 'canceled' && ev.error !== 'interrupted') AP.audioInfo.err = ev.error; finish(); };
     u._finish = finish;
     keep = u;
     return u;
@@ -243,15 +246,7 @@
     return out;
   }
   /* Premier toucher : déverrouille l'audio sur iOS (les lectures automatiques sont sinon ignorées) */
-  AP.unlockAudio = function () {
-    if (unlocked || !AP.hasSpeech) return;
-    unlocked = true;
-    try {
-      const u = new SpeechSynthesisUtterance(' ');
-      u.volume = 0; u.lang = 'en-GB';
-      window.speechSynthesis.speak(u);
-    } catch (e) { /* ignore */ }
-  };
+  AP.unlockAudio = function () { /* inutile : le son démarre directement au toucher */ };
   ['touchend', 'click'].forEach(function (ev) { document.addEventListener(ev, function () { AP.unlockAudio(); }, { capture: true, passive: true }); });
   /* Lit un texte. Retourne false si l'audio n'existe pas sur l'appareil. */
   AP.speak = function (text, rate) {
@@ -259,17 +254,31 @@
     const my = ++seqId;
     try {
       const ss = window.speechSynthesis;
-      const busy = ss.speaking || ss.pending;
-      if (busy) ss.cancel();
       const list = chunks(text);
-      let i = 0;
-      const next = function () {
-        if (my !== seqId || i >= list.length) return;
-        const piece = list[i++];
-        const u = utter(piece, rate, function () { if (i < list.length) setTimeout(next, 60); });
-        fire(u, 4000 + piece.length * 120);
+      const run = function () {
+        let i = 0;
+        const next = function () {
+          if (my !== seqId || i >= list.length) return;
+          const piece = list[i++];
+          const u = utter(piece, rate, function () { if (i < list.length) setTimeout(next, 60); });
+          fire(u, 4000 + piece.length * 120);
+          if (i === 1 && !noVoice) {
+            /* rien après 1,3 s : on réessaie une fois avec la voix par défaut du téléphone */
+            setTimeout(function () {
+              let sp = false; try { sp = ss.speaking; } catch (e) { /* ignore */ }
+              if (my === seqId && !u._started && !u._finished && !sp) {
+                try { ss.cancel(); } catch (e) { /* ignore */ }
+                noVoice = true; i = 0;
+                setTimeout(function () { if (my === seqId) next(); }, 200);
+              }
+            }, 1300);
+          }
+        };
+        next();
       };
-      if (busy) setTimeout(next, 140); else next();
+      let busy = false;
+      try { busy = ss.speaking; } catch (e) { /* ignore */ }
+      if (busy) { ss.cancel(); setTimeout(run, 250); } else { try { ss.cancel(); } catch (e) { /* ignore */ } setTimeout(run, 30); }
       return true;
     } catch (e) { return false; }
   };
