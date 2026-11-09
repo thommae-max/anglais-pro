@@ -249,9 +249,33 @@
   AP.unlockAudio = function () { /* inutile : le son démarre directement au toucher */ };
   ['touchend', 'click'].forEach(function (ev) { document.addEventListener(ev, function () { AP.unlockAudio(); }, { capture: true, passive: true }); });
   /* Lit un texte. Retourne false si l'audio n'existe pas sur l'appareil. */
+  /* iOS coupe la synthèse vocale quand le commutateur silencieux est activé, sauf si une lecture audio « média » est en cours */
+  const SIL = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+  let silentEl = null;
+  AP.silentKick = function () {
+    try {
+      if (!silentEl) { silentEl = new Audio(SIL); silentEl.setAttribute('playsinline', ''); }
+      const p = silentEl.play(); if (p && p.catch) p.catch(function () { /* ignore */ });
+    } catch (e) { /* ignore */ }
+  };
+  AP.diagnose = function (done) {
+    const r = { speech: AP.hasSpeech, voices: 0, en: 0, started: false, ended: false, err: '', standalone: !!(window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)) };
+    if (!AP.hasSpeech) { done(r); return; }
+    try {
+      loadVoices(); r.voices = voices.length; r.en = voices.filter(function (v) { return /^en/i.test(v.lang || ''); }).length;
+      AP.silentKick();
+      const ss = window.speechSynthesis; ss.cancel();
+      const u = new SpeechSynthesisUtterance('Hello'); u.lang = 'en-GB';
+      u.onstart = function () { r.started = true; }; u.onend = function () { r.ended = true; };
+      u.onerror = function (ev) { r.err = (ev && ev.error) || 'erreur'; };
+      ss.speak(u);
+    } catch (e) { r.err = String((e && e.name) || e); }
+    setTimeout(function () { done(r); }, 3000);
+  };
   AP.speak = function (text, rate) {
     if (!AP.hasSpeech) return false;
     const my = ++seqId;
+    AP.silentKick();
     const ss = window.speechSynthesis;
     const list = chunks(text);
     let i = 0, retried = false;

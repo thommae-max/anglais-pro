@@ -577,7 +577,8 @@
       '<div class="set"><div class="l"><b>Vitesse</b></div><select data-set="rate">' + opt([[0.7, 'Lente'], [0.85, 'Posée'], [1, 'Normale']], s.rate) + '</select></div>' +
       '<div class="set"><div class="l"><b>Lecture automatique</b><span>Prononce chaque nouvelle carte</span></div><button class="sw ' + (s.autoplay ? 'on' : '') + '" data-act="toggleauto" role="switch" aria-checked="' + !!s.autoplay + '" aria-label="Lecture automatique"></button></div>' +
       '<div class="set"><div class="l"><b>Tester la voix</b><span>Voix : ' + E((AP.audioInfo && AP.audioInfo.voice) || 'pas encore testée') + (AP.audioInfo && AP.audioInfo.err ? ' · erreur : ' + E(AP.audioInfo.err) : '') + '</span></div><button class="btn sm alt" data-act="say" data-say="Nice to meet you. Let me walk you through the key figures.">' + I.spk.replace('<svg', '<svg style="width:18px;height:18px"') + 'Écouter</button></div>' +
-      '<div class="set"><div class="l"><b>Plus de son ?</b><span>Vérifiez le volume et le mode silencieux, puis réparez</span></div><button class="btn sm alt" data-act="repair">Réparer</button></div></div>';
+      '<div class="set"><div class="l"><b>Plus de son ?</b><span>Vérifiez le volume et le mode silencieux, puis réparez</span></div><button class="btn sm alt" data-act="repair">Réparer</button></div>' +
+      '<div class="set"><div class="l"><b>Diagnostic audio</b><span id="diag">Touchez Lancer et envoyez-moi ce texte</span></div><button class="btn sm alt" data-act="diag">Lancer</button></div></div>';
     h += '<div class="h2">Apprentissage</div><div class="list">' +
       '<div class="set"><div class="l"><b>Objectif du jour</b><span>Cartes par session</span></div><select data-set="goal">' + opt([[8, '8 (≈ 4 min)'], [12, '12 (≈ 6 min)'], [20, '20 (≈ 10 min)'], [30, '30 (≈ 15 min)']], s.goal) + '</select></div>' +
       '<div class="set"><div class="l"><b>Difficulté des quiz</b></div><select data-set="level">' + opt([['normal', 'Normal'], ['hard', 'Difficile'], ['expert', 'Expert']], s.level) + '</select></div>' +
@@ -731,6 +732,13 @@
     refth(el) { refState.th = el.dataset.v; refState.lim = 60; viewRef(); },
     morerefs() { refState.lim += 100; fillResults(); },
     toggleauto() { AP.S.settings.autoplay = !AP.S.settings.autoplay; AP.save(); viewSettings(); },
+    diag(el) {
+      const box = document.getElementById('diag'); if (!box) return;
+      box.textContent = 'Test en cours (3 s)…';
+      AP.diagnose((r) => {
+        box.textContent = 'Synthèse vocale : ' + (r.speech ? 'oui' : 'NON') + ' · voix : ' + r.voices + ' (anglais : ' + r.en + ') · démarrée : ' + (r.started ? 'oui' : 'NON') + ' · terminée : ' + (r.ended ? 'oui' : 'non') + ' · erreur : ' + (r.err || 'aucune') + ' · app installée : ' + (r.standalone ? 'oui' : 'non') + ' · version ' + ((window.APCONF||{}).version||'');
+      });
+    },
     repair() { if (AP.repairAudio()) toast('Son réinitialisé : écoutez le test'); else toast('Audio indisponible sur cet appareil'); },
     export() {
       const code = AP.exportCode();
