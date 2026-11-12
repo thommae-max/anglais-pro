@@ -270,7 +270,7 @@
   };
   AP.diagnose = function (done) {
     const r = { speech: AP.hasSpeech, voices: 0, en: 0, started: false, ended: false, err: '', standalone: !!(window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches)) };
-    if (!AP.hasSpeech) { done(r); return; }
+    if (!AP.hasSpeech) { r.clips = AP.clipCount(); done(r); return; }
     try {
       loadVoices(); r.voices = voices.length; r.en = voices.filter(function (v) { return /^en/i.test(v.lang || ''); }).length;
       AP.silentKick();
@@ -280,7 +280,14 @@
       u.onerror = function (ev) { r.err = (ev && ev.error) || 'erreur'; };
       ss.speak(u);
     } catch (e) { r.err = String((e && e.name) || e); }
-    setTimeout(function () { done(r); }, 3000);
+    r.clips = AP.clipCount(); r.clip = 'non testée';
+    setTimeout(function () {
+      const u2 = AP.clipUrl('hello');
+      if (!u2) { r.clip = 'aucun fichier'; return; }
+      r.clip = 'sans réponse';
+      playClip(u2, 1, function () { r.clip = 'OK'; }, function () { r.clip = 'ÉCHEC'; });
+    }, 1200);
+    setTimeout(function () { done(r); }, 4200);
   };
   AP.speak = function (text, rate) {
     if (!AP.hasSpeech) return false;
@@ -322,7 +329,7 @@
     } catch (e) { AP.audioInfo.err = String((e && e.name) || e); return false; }
   };
   /* Lit plusieurs textes à la suite (écoute TOEIC) ; gap en millisecondes */
-  AP.speakSeq = function (list, gap, done) {
+  const ttsSeq = function (list, gap, done) {
     if (!AP.hasSpeech) return false;
     const my = ++seqId;
     try {
@@ -343,7 +350,55 @@
       return true;
     } catch (e) { return false; }
   };
-  AP.stopSpeech = function () { seqId++; try { if (AP.hasSpeech) window.speechSynthesis.cancel(); } catch (e) { /* ignore */ } };
+  /* ---------- Voix enregistrées (fichiers audio fournis avec l'app) ---------- */
+  AP.fnv = function (t) { let x = 0x811c9dc5; for (let i = 0; i < t.length; i++) { x ^= t.charCodeAt(i); x = Math.imul(x, 0x01000193) >>> 0; } return ('00000000' + x.toString(16)).slice(-8); };
+  let idx = null;
+  AP.clipCount = function () { AP.clipUrl('x'); return Object.keys(idx).length; };
+  AP.clipUrl = function (text) {
+    if (!idx) { idx = {}; String(window.AUDIO_IDX || '').split(' ').forEach(function (h) { if (h) idx[h] = 1; }); }
+    const h = AP.fnv(AP.speakText(text));
+    return idx[h] ? 'audio/' + h + '.mp3' : null;
+  };
+  let player = null;
+  function getPlayer() {
+    if (!player) { player = new Audio(); player.preload = 'auto'; player.setAttribute('playsinline', ''); try { player.preservesPitch = true; player.webkitPreservesPitch = true; } catch (e) { /* ignore */ } }
+    return player;
+  }
+  function playClip(url, rate, onend, onfail) {
+    const p = getPlayer(); let done = false;
+    const fail = function () { if (done) return; done = true; p.onended = p.onerror = null; if (onfail) onfail(); };
+    p.onended = function () { if (done) return; done = true; p.onended = p.onerror = null; if (onend) onend(); };
+    p.onerror = fail;
+    try {
+      const r = Math.min(1, Math.max(0.5, rate || AP.S.settings.rate || 1));
+      p.src = url; p.defaultPlaybackRate = r; p.playbackRate = r;
+      const pr = p.play(); if (pr && pr.catch) pr.catch(fail);
+    } catch (e) { fail(); }
+  }
+  const ttsSpeak = AP.speak;
+  AP.speak = function (text, rate) {
+    const url = AP.clipUrl(text);
+    if (!url) return ttsSpeak(text, rate);
+    const my = ++seqId;
+    try { if (AP.hasSpeech) window.speechSynthesis.cancel(); } catch (e) { /* ignore */ }
+    AP.audioInfo.voice = 'voix enregistrée';
+    playClip(url, rate, null, function () { if (my === seqId) { AP.audioInfo.voice = 'voix du téléphone (secours)'; ttsSpeak(text, rate); } });
+    return true;
+  };
+  AP.speakSeq = function (list, gap, done) {
+    if (!list.every(function (t) { return AP.clipUrl(t); })) return AP.hasSpeech ? ttsSeq(list, gap, done) : false;
+    const my = ++seqId; let i = 0;
+    try { if (AP.hasSpeech) window.speechSynthesis.cancel(); } catch (e) { /* ignore */ }
+    const next = function () {
+      if (my !== seqId) return;
+      if (i >= list.length) { if (done) done(); return; }
+      const t = list[i++];
+      playClip(AP.clipUrl(t), 1, function () { setTimeout(next, gap || 700); }, function () { if (my === seqId && AP.hasSpeech) ttsSeq(list.slice(i - 1), gap, done); });
+    };
+    next();
+    return true;
+  };
+  AP.stopSpeech = function () { seqId++; try { if (player) { player.onended = player.onerror = null; player.pause(); } } catch (e) { /* ignore */ } try { if (AP.hasSpeech) window.speechSynthesis.cancel(); } catch (e) { /* ignore */ } };
   /* Réparation du son : vide la file et recharge les voix */
   AP.repairAudio = function () {
     if (!AP.hasSpeech) return false;

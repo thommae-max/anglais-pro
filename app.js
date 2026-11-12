@@ -39,7 +39,6 @@
   const spk = (text, cls) => '<button class="spk ' + (cls || '') + '" data-act="say" data-say="' + E(text) + '" aria-label="Écouter">' + I.spk + '</button>';
   const star = (id) => '<button class="star ' + (AP.isFav(id) ? 'on' : '') + '" data-act="fav" data-id="' + id + '" aria-label="Favori">' + I.star + '</button>';
   function say(text, rate) {
-    if (!AP.hasSpeech) { toast('Audio indisponible sur cet appareil'); return; }
     AP.speak(text, rate);
   }
 
@@ -734,9 +733,9 @@
     toggleauto() { AP.S.settings.autoplay = !AP.S.settings.autoplay; AP.save(); viewSettings(); },
     diag(el) {
       const box = document.getElementById('diag'); if (!box) return;
-      box.textContent = 'Test en cours (3 s)…';
+      box.textContent = 'Test en cours (4 s)…';
       AP.diagnose((r) => {
-        box.textContent = 'Synthèse vocale : ' + (r.speech ? 'oui' : 'NON') + ' · voix : ' + r.voices + ' (anglais : ' + r.en + ') · démarrée : ' + (r.started ? 'oui' : 'NON') + ' · terminée : ' + (r.ended ? 'oui' : 'non') + ' · erreur : ' + (r.err || 'aucune') + ' · app installée : ' + (r.standalone ? 'oui' : 'non') + ' · version ' + ((window.APCONF||{}).version||'');
+        box.textContent = 'Synthèse vocale : ' + (r.speech ? 'oui' : 'NON') + ' · voix : ' + r.voices + ' (anglais : ' + r.en + ') · démarrée : ' + (r.started ? 'oui' : 'NON') + ' · fichiers audio : ' + (r.clips || 0) + ' · lecture fichier : ' + (r.clip || '-') + ' · terminée : ' + (r.ended ? 'oui' : 'non') + ' · erreur : ' + (r.err || 'aucune') + ' · app installée : ' + (r.standalone ? 'oui' : 'non') + ' · version ' + ((window.APCONF||{}).version||'');
       });
     },
     repair() { if (AP.repairAudio()) toast('Son réinitialisé : écoutez le test'); else toast('Audio indisponible sur cet appareil'); },

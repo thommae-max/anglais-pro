@@ -1,6 +1,6 @@
 /* Anglais pro : service worker (hors ligne + notifications) */
-const CACHE = 'anglais-pro-v18';
-const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'core.js', 'quiz.js', 'config.js', 'content.js', 'toeic-data.js', 'partner.js', 'apprendre.js', 'oral.js', 'progress.js', 'toeic-ui.js', 'toeic7-data.js', 'toeic7.js', 'main.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
+const CACHE = 'anglais-pro-v19';
+const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'core.js', 'quiz.js', 'config.js', 'audio-index.js', 'content.js', 'toeic-data.js', 'partner.js', 'apprendre.js', 'oral.js', 'progress.js', 'toeic-ui.js', 'toeic7-data.js', 'toeic7.js', 'main.js', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => Promise.all(SHELL.map((u) => c.add(new Request(u, { cache: 'reload' }))))).then(() => self.skipWaiting()));
@@ -11,7 +11,7 @@ self.addEventListener('activate', (e) => {
 /* Réponse immédiate depuis le cache, mise à jour en arrière-plan */
 self.addEventListener('fetch', (e) => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  if (req.method !== 'GET' || new URL(req.url).origin !== location.origin || new URL(req.url).pathname.indexOf('/audio/') >= 0) return;
   e.respondWith(caches.open(CACHE).then((c) => c.match(req, { ignoreSearch: true }).then((hit) => {
     const net = fetch(req).then((res) => { if (res && res.ok) c.put(req, res.clone()); return res; }).catch(() => hit);
     return hit || net;

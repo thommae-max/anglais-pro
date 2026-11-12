@@ -81,7 +81,7 @@
 
   function listen(q) {
     if (!AP.hasSpeech) { U.toast('Audio indisponible sur cet appareil'); return; }
-    if (q.part === 'p2') AP.speakSeq([q.q, 'A. ' + q.opts[0], 'B. ' + q.opts[1], 'C. ' + q.opts[2]], 900);
+    if (q.part === 'p2') AP.speakSeq([q.q, 'A.', q.opts[0], 'B.', q.opts[1], 'C.', q.opts[2]], 450);
     else AP.speakSeq([q.talk], 400);
   }
 
