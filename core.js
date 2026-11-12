@@ -252,7 +252,17 @@
   /* iOS coupe la synthèse vocale quand le commutateur silencieux est activé, sauf si une lecture audio « média » est en cours */
   const SIL = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
   let silentEl = null;
+  let actx = null;
   AP.silentKick = function () {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) {
+        if (!actx) actx = new AC();
+        if (actx.state !== 'running') actx.resume();
+        const b = actx.createBuffer(1, 1, 22050), s = actx.createBufferSource();
+        s.buffer = b; s.connect(actx.destination); s.start(0);
+      }
+    } catch (e) { /* ignore */ }
     try {
       if (!silentEl) { silentEl = new Audio(SIL); silentEl.setAttribute('playsinline', ''); }
       const p = silentEl.play(); if (p && p.catch) p.catch(function () { /* ignore */ });
